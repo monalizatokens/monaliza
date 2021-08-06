@@ -32,4 +32,8 @@ margin-right: 2rem;
 .card-body h3{
     padding-top: 4rem;
 }
+.fas{
+    size: 1rem;
+    color:grey;
+}
 

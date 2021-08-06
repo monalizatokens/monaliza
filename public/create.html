@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
     crossorigin="anonymous">
+   <link rel="stylesheet" href="index.html"> 
    <link rel="stylesheet" href="market.html">
    <link rel="stylesheet" href="css/style.css">
   <title>Monaliza</title>
@@ -35,7 +36,40 @@
             </li>
           </ul>
           
-            <button class="btn btn-secondary btn-lg">Connect Wallet</button>
-        
+            <button class="btn btn-secondary btn-lg">Connected</button>
+            <i class="fas fa-user-circle fa-lg ml-3"></i>
         </div>
       </nav>
+
+
+      <!--main page-->
+      <section class="mt-5">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-6">
+              <h5>Asset image</h5>
+              <div class="input-group mb-3 px-2 py-2 bg-white">
+                <input id="upload" type="file" onchange="readURL(this);" class="form-control border-0">
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <h5>Asset details</h5>
+              <form>
+                <div class="input-group input-group-lg mb-3">                                       
+                  <input type="text" class="form-control" placeholder="Asset name">
+               </div>
+
+                <div class="input-group input-group-lg mb-3">
+                    <input type="email" class="form-control" placeholder="Documentation URL">
+                </div>
+
+                <div class="input-group input-group-lg mb-3">
+                    <textarea rows="5" class="form-control" placeholder="Description"></textarea>
+                </div>
+
+               <input type="submit" value="create" class="btn btn-primary btn-lg my-3">
+            </form>
+            </div>
+          </div>
+        </div>
+      </section>
