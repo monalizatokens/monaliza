@@ -37,3 +37,10 @@ margin-right: 2rem;
     color:grey;
 }
 
+#main{
+    margin-top: 200px;
+}
+
+.my-button{
+    width: 415px;
+}
