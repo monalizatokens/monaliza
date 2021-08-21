@@ -15,7 +15,11 @@ $( document ).ready(function() {
             success: function(result){
                 console.log(result);
                 localStorage.setItem('fileName', result.file.filename); 
-                alert("File Uploaded successfully");    
+                //alert("File Uploaded successfully");    
+                $.showNotification({
+                      body:"<h3>File Uploaded successfully</h3>"
+                })
+                    
                 $("#fileuploadbutton").prop("value", "Re-upload");
             }
           } );
@@ -51,7 +55,17 @@ $( document ).ready(function() {
                 data: JSON.stringify(data),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                success: function(data){console.log(data);},
+                success: function(data){
+                    console.log(data);
+                    $.showNotification({
+                        body:"<h3>" + data.message + "</h3>",
+                        duration: 300000,
+                        maxWidth:"820px",
+                        shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                        zIndex: 100,
+                        margin:"1rem"
+                    })
+                },
                 error: function(errMsg) {
                     console.log(errMsg);
                 }

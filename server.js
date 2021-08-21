@@ -1,3 +1,7 @@
+process.on('uncaughtException', (err) => {
+    console.log('whoops! there was an error');
+ });
+
 var TruffleContract = require("@truffle/contract");
 let MonalizaArtifact = require("./build/contracts/MonalizaContractFactory.json");
 let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
@@ -227,6 +231,7 @@ app.post('/deployandmintnft_v2', (req, res) => {
                 monalizaInstance.mintNFT(erc721ContractAddress, addresses[i], "https://ipfs.io/ipfs/" + result.IpfsHash, {from: FROM_ACCOUNT, gas: 4600000}).then
                 (function(result){
                     console.log("NFT minted transaction id is " + result.tx)
+                    res.json({"message": "NFT with contract address " + erc721ContractAddress + " minted and transferred to first address " + addresses[0] + " and transaction id is " + result.tx + " . Check it on https://rinkeby.etherscan.io"})
                 }).catch(function(err) {
                 console.log(err);
                 });
