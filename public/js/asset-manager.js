@@ -1,6 +1,7 @@
 $( document ).ready(function() {
     
     console.log( "ready!" );
+    $("#myProgress").hide();
 
     $("#fileuploaderform").submit(function(e){
         //$("#fileuploaderform").submit();
@@ -48,6 +49,9 @@ $( document ).ready(function() {
             }
             var url = "/deployandmintnft_v2"
             
+            $("#myProgress").show();
+            startProgressBar();
+
             $.ajax({
                 type: "POST",
                 url: url,
@@ -64,7 +68,8 @@ $( document ).ready(function() {
                         shadow:"0 2px 6px rgba(0,0,0,0.2)",
                         zIndex: 100,
                         margin:"1rem"
-                    })
+                    });
+                    $("#myProgress").hide();
                 },
                 error: function(errMsg) {
                     console.log(errMsg);
@@ -77,6 +82,27 @@ $( document ).ready(function() {
         console.log("In success");
         console.log(result);
         console.log(status);
+    }
+
+    function startProgressBar(){
+        var i = 0;
+            //function move() {
+            if (i == 0) {
+                i = 1;
+                var elem = document.getElementById("myBar");
+                var width = 1;
+                var id = setInterval(frame, 500);
+                function frame() {
+                if (width >= 100) {
+                    clearInterval(id);
+                    i = 0;
+                } else {
+                    width++;
+                    elem.style.width = width + "%";
+                }
+                }
+            }
+            //}
     }
 
 });
