@@ -46,39 +46,56 @@
           <div class="row">
             <div class="col-lg-6">
               <h5 class="font-weight-bold">Asset image</h5>
-              <div class="input-group mb-3 px-2 py-2 bg-white">
-                <input id="upload" type="file" onchange="readURL(this);" class="form-control border-0">
+              <div class="container p-5">
+                <iframe name="votar" style="display:none;"></iframe>
+                <form id = "fileuploaderform"
+                  target="votar"
+                  enctype="multipart/form-data" 
+                  method="post">
+                 <div class="form-group">
+                  <input type="file" name="file-to-upload">
+                 </div>
+                 <input 
+                   type="submit" 
+                   id="fileuploadbutton"
+                   class="btn btn-primary" 
+                   value="Upload">
+                </form>
               </div>
             </div>
             <div class="col-lg-6">
               <h5 class="font-weight-bold">Asset details</h5>
              <form>
                 <div class="input-group input-group-lg mb-3">                                       
-                  <input type="text" class="form-control" placeholder="Asset name">
+                  <input id="assetName" type="text" class="form-control" placeholder="Asset name">
                </div>
-
+               <div class="input-group input-group-lg mb-3">                                       
+                <input id="assetSymbol" type="text" class="form-control" placeholder="Asset symbol">
+               </div>
                 <div class="input-group input-group-lg mb-3">
-                    <input type="email" class="form-control" placeholder="Documentation URL">
+                    <input id="docURL" type="text" class="form-control" placeholder="Documentation URL">
                 </div>
 
                 <div class="input-group input-group-lg mb-3">
-                    <textarea rows="5" class="form-control" placeholder="Description"></textarea>
+                    <textarea id="description" rows="5" class="form-control" placeholder="Description"></textarea>
                 </div> 
             </form> 
             <div class="mt-5">
-            <h5 class="font-weight-bold">interaction restriction</h5>
+            <h5 class="font-weight-bold">Interaction restriction (Whitelist)</h5>
             <table class="table table-bordered">
               <thead>
-                <tr>
-                  <th scope="col">Whitelist</th>
-                  <th scope="col"> </th>
-                </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>public key1</td>
-                  <td> </td>
+                  <div class="input-group input-group-lg mb-3">                                       
+                    <input type="text" class="form-control whitelist" placeholder="Public Address">
+                  </div>
                 </tr>
+                <tr>
+                  <div class="input-group input-group-lg mb-3">                                       
+                    <input type="text" class="form-control whitelist" placeholder="Public Address">
+                  </div>
+                </tr>               
                 <tr style="height: 50px;">
                   <td> </td>
                   <td> </td>
@@ -93,7 +110,7 @@
          </div>      
         </div>
 
-          <button type="submit" class="btn btn-danger btn-lg mt-5">Create</button>  
+          <button id="create-asset-btn" type="submit" class="btn btn-danger btn-lg mt-5">Create</button>  
 
         </div>
       </section>
@@ -104,6 +121,6 @@
   crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
   crossorigin="anonymous"></script>
-
+  <script src=js/asset-manager.js></script>
 </body>
 </html>
