@@ -117,11 +117,12 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
     }
   })
 
-app.get('/deploynftcontract', upload.single('file-to-upload'), (req, res, next) => {
+app.post('/deploynftcontract', (req, res, next) => {
     console.log("Starting to execute deploynft");
     //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
-    var name = "Monaliza"
-    var symbol = "MNLJ"
+    var name = req.body.assetName;
+    var symbol = req.body.assetSymbol;
+    console.log(name + " " + symbol);
     monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 5000000})
   .then(function(value) {
     console.log("NFT contract address " + value.receipt.rawLogs[0].address);
