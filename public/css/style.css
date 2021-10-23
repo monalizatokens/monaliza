@@ -1,46 +1,47 @@
-body{
-font-family: Arial, Helvetica, sans-serif;
+.navbar-brand{
+    font-size : 2rem;
 }
-
-.navbar{
-font-size: 2rem;
-margin-right: 2rem;
-}
-
 .nav-link{
+
     margin-right: 3rem;
 }
 
-.text-primary{
-    text-decoration: underline;
+.btn-gradient{
+    background-image: linear-gradient(to right, #F869D5, #5650DE);
+    border-radius: 35px;    
 }
 
-#text-section h3{
-    text-align: end;
-    color: blueviolet;
-    text-decoration: underline;
-    text-underline-position: under;    
-    margin-right: 5rem;
+.styling{
+    border-color: lightslategrey;
+    border-style: dotted;
+    width: 300px;
+    height: 250px;
+    border-radius: 5%;
+}
+.content-center{
+    flex: d-flex;
+    justify-content: center;
 }
 
-.card{
-    width: 18rem;
-    height: 15rem;
-    border-width: 0.3rem;
+#create-section .container{
+    margin-top: 100px;
 }
 
-.card-body h3{
-    padding-top: 4rem;
-}
+
 .fas{
     size: 1rem;
     color:grey;
 }
 
-#main{
-    margin-top: 200px;
-}
-
 .my-button{
     width: 415px;
 }
+
+.jumbotron{
+    height: 400px;
+    background-size: cover; 
+    background-repeat: no-repeat;
+    background-position: center center; 
+    color: #5650DE;
+    filter: ;
+   }

@@ -14,15 +14,16 @@
 
 <!--main navbar-->
 
-    <body>
-
-      <nav class="navbar navbar-expand-lg navbar-light">
+<body data-spy="scroll" data-target="#main-nav" id="home">
+      <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
+      <div class="container">
+          <a href="index1.html" class="navbar-brand font-weight-bold">Monaliza</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
       
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav mx-auto">
+        <div class="collapse navbar-collapse" id="navbarcollapse">
+          <ul class="navbar-nav ml-auto h5">
             <li class="nav-item">
               <a class="nav-link" href="index.html">Home</a>
             </li>
@@ -30,73 +31,69 @@
               <a class="nav-link" href="market.html">Market</a>
             </li>
            <li class="nav-item active">
-              <a class="nav-link text-primary" href="create.html">Create</a>
+              <a class="nav-link" href="create.html">Create</a>
             </li>
           </ul>
           
-            <button class="btn btn-primary btn-lg">Connected</button>
-            <i class="fas fa-user-circle fa-lg ml-3"></i>
+            <button class="btn btn-lg btn-gradient text-white">Connected</button>
+            <i class="fas fa-user-circle fa-2x ml-3"></i>
         </div>
+       </div> 
       </nav>
 
 
       <!--main page-->
-      <section class="mt-5">
+      <header id="create-section">
         <div class="container">
-          <div class="row">
-            <div class="col-lg-6">
-              <h5 class="font-weight-bold">Asset image</h5>
-              <div class="input-group mb-3 px-2 py-2 bg-white">
-                <input id="upload" type="file" onchange="readURL(this);" class="form-control border-0">
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <h5 class="font-weight-bold">Asset details</h5>
-             <form>
-                <div class="input-group input-group-lg mb-3">                                       
-                  <input type="text" class="form-control" placeholder="Asset name">
-               </div>
+          <div class="row justify-content-center">
+            <div class="col-sm-8">
+              <div>
+                   <p class="h4">Asset image</p>
+                    <h5>Image</h5>
+                    <p class="text-dark">File types supported: JPG, PNG Max size: 100 MB </p>                 
+                   <div class="text-center styling">
+                    <p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
+                    <p><label for="file" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
+                    <p><img id="output" width="200" /></p>
+                   </div> 
+              </div>                     
+            
+                <div class="mt-5">
+                    <p class="h4">Asset details</p>                  
+                    <form>
+                      <div class="form-group">
+                          <input type="text" class="form-control form-control-lg" placeholder="Asset Name">
+                      </div>
+                      <div class="form-group">
+                          <input type="email" class="form-control form-control-lg" placeholder="Documentation URL">
+                      </div>
+                      <div class="form-group">
+                          <input type="password" class="form-control form-control-lg" placeholder="Description">
+                      </div>
+                                      
+                          <input type="submit" value="Submit" class="btn text-white btn-primary">
+                  </form>
+              </div>          
+          
+              <div class="mt-5">
+                 <p class="h4">Interaction details</p>
+                  <ul class="list-group">
+                    <li class="list-group-item">whitelist</li>
+                    <li class="list-group-item">public key1</li>
+                    <li class="list-group-item" style="height: 3rem;"> </li>
+                    <li class="list-group-item"  style="height: 3rem;"> </li>
+                  </ul>
+             </div>      
+         </div>
 
-                <div class="input-group input-group-lg mb-3">
-                    <input type="email" class="form-control" placeholder="Documentation URL">
-                </div>
-
-                <div class="input-group input-group-lg mb-3">
-                    <textarea rows="5" class="form-control" placeholder="Description"></textarea>
-                </div> 
-            </form> 
-            <div class="mt-5">
-            <h5 class="font-weight-bold">interaction restriction</h5>
-            <table class="table table-bordered">
-              <thead>
-                <tr>
-                  <th scope="col">Whitelist</th>
-                  <th scope="col"> </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>public key1</td>
-                  <td> </td>
-                </tr>
-                <tr style="height: 50px;">
-                  <td> </td>
-                  <td> </td>
-                </tr>
-                <tr style="height: 50px;">
-                  <td> </td>
-                  <td> </td>
-                </tr>
-              </tbody>
-            </table>
-          </div> 
-         </div>      
+        <div class="container mb-3">
+         <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg px-5 ">Create</button>  
+         </div>   
         </div>
-
-          <button type="submit" class="btn btn-danger btn-lg mt-5">Create</button>  
-
-        </div>
-      </section>
+       </div>
+      </div>    
+      </header>
 
       <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
   crossorigin="anonymous"></script>
@@ -104,6 +101,12 @@
   crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
   crossorigin="anonymous"></script>
+  <script>
+    var loadFile = function(event) {
+      var image = document.getElementById('output');
+      image.src = URL.createObjectURL(event.target.files[0]);
+    };
+    </script>
 
 </body>
 </html>
