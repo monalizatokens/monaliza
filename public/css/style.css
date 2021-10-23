@@ -45,3 +45,14 @@
     color: #5650DE;
     filter: ;
    }
+
+#myProgress {
+    width: 100%;
+    background-color: rgb(233, 233, 233);
+  }
+  
+#myBar {
+width: 1%;
+height: 30px;
+background-color: rgb(44, 52, 155);
+}

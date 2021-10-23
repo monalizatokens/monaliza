@@ -42,6 +42,7 @@ $( document ).ready(function() {
     $("#create-asset-btn").click(function()
         {
             var validationStatus = validateFields();
+            console.log(validationStatus);
             if(validationStatus == true){
                 const web3Instance = new Web3(window['ethereum']);
                 msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"), {encoding: "hex"})
@@ -66,7 +67,8 @@ $( document ).ready(function() {
                     fileName: localStorage.getItem("fileName"),
                     contractAddress : "0x6aaeABe1c4762264216b194978E77b730501B1E9",
                     assetName: $("#assetName").val(),
-                    assetSymbol: $("#assetSymbol").val(),
+                    //assetSymbol: $("#assetSymbol").val(),
+                    assetSymbol: "MNLZ",
                     docURL: $("#docURL").val(),
                     description: $("#description").val(),
                     addresses: addressses,
@@ -139,12 +141,12 @@ $( document ).ready(function() {
             $.showNotification({
                 body:"<h3>Please enter Asset name.</h3>"
           })
-        }else if(assetSymbol == ''){
+        }/*else if(assetSymbol == ''){
             validationStatus = false;
             $.showNotification({
                 body:"<h3>Please enter Asset symbol.</h3>"
           })
-        }  
+        }  */
         return validationStatus;
     }
 

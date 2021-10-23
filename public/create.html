@@ -33,15 +33,23 @@
            <li class="nav-item active">
               <a class="nav-link" href="create.html">Create</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="airdrop.html">Airdrop</a>
+            </li>             
+            <li class="nav-item">
+              <a class="nav-link" href="claim.html">Claim</a>
+            </li> 
           </ul>
           
-            <button class="btn btn-lg btn-gradient text-white">Connected</button>
+            <button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>
             <i class="fas fa-user-circle fa-2x ml-3"></i>
         </div>
        </div> 
       </nav>
 
-
+      <div id="myProgress">
+        <div id="myBar"></div>
+      </div>
       <!--main page-->
       <header id="create-section">
         <div class="container">
@@ -52,9 +60,27 @@
                     <h5>Image</h5>
                     <p class="text-dark">File types supported: JPG, PNG Max size: 100 MB </p>                 
                    <div class="text-center styling">
-                    <p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
+                    <!--<p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
                     <p><label for="file" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
-                    <p><img id="output" width="200" /></p>
+                    <p><img id="output" width="200" /></p>-->
+                    <iframe name="votar" style="display:none;"></iframe>
+                    <form id = "fileuploaderform"
+                      target="votar"
+                      enctype="multipart/form-data" 
+                      method="post">
+                     <div class="form-group">
+                      <input type="file" accept="image/*" id="file-to-upload" name="file-to-upload" onchange="loadFile(event)" style="display: none;">
+                      <!--<p><input type="file"  accept="image/*" name="image" id="file-to-upload"  onchange="loadFile(event)" style="display: none;"></p>-->
+                      <p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
+                      <p><img id="output" width="100" /></p>
+                     </div>
+                     <input 
+                       type="submit" 
+                       id="fileuploadbutton"
+                       class="btn btn-primary" 
+                       value="Upload" style="display: none;">
+                    </form>
+
                    </div> 
               </div>                     
             
@@ -62,33 +88,33 @@
                     <p class="h4">Asset details</p>                  
                     <form>
                       <div class="form-group">
-                          <input type="text" class="form-control form-control-lg" placeholder="Asset Name">
+                          <input id="assetName" type="text" class="form-control form-control-lg" placeholder="Asset Name">
+                      </div>
+                      <!--<div class="form-group">
+                        <input id="assetSymbol" type="text" class="form-control form-control-lg" placeholder="Asset Symbol">
+                    </div> -->                     
+                      <div class="form-group">
+                          <input id="docURL" type="text" class="form-control form-control-lg" placeholder="Documentation URL">
                       </div>
                       <div class="form-group">
-                          <input type="email" class="form-control form-control-lg" placeholder="Documentation URL">
-                      </div>
-                      <div class="form-group">
-                          <input type="password" class="form-control form-control-lg" placeholder="Description">
+                          <input id="description" type="text" class="form-control form-control-lg" placeholder="Description">
                       </div>
                                       
-                          <input type="submit" value="Submit" class="btn text-white btn-primary">
+                          <!--<input type="submit" value="Submit" class="btn text-white btn-primary">-->
                   </form>
               </div>          
           
-              <div class="mt-5">
-                 <p class="h4">Interaction details</p>
+              <!--<div class="mt-5">
+                 <p class="h4">Airdrop address list</p>
                   <ul class="list-group">
-                    <li class="list-group-item">whitelist</li>
-                    <li class="list-group-item">public key1</li>
-                    <li class="list-group-item" style="height: 3rem;"> </li>
-                    <li class="list-group-item"  style="height: 3rem;"> </li>
+                    <li class="list-group-item"><input type="text" class="form-control form-control-lg whitelist" placeholder="Address"></li>
                   </ul>
-             </div>      
+             </div> -->    
          </div>
 
         <div class="container mb-3">
          <div class="text-center">
-            <button type="submit" class="btn btn-primary btn-lg px-5 ">Create</button>  
+            <button id="create-asset-btn" type="submit" class="btn btn-primary btn-lg px-5 ">Create</button>  
          </div>   
         </div>
        </div>
@@ -101,10 +127,15 @@
   crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
   crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.0/web3.min.js" integrity="sha512-+BhnLgfzIDDjssoEWHPmdgWRvbwIEdj0Xfiys7uSqfQWpMEOJ4ymJ88O6B1cB0j+4zjb5GhO+sb/kEicggvUQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src=js/bootstrap-show-notification.js></script>
+  <script src=js/asset-manager.js></script>
   <script>
     var loadFile = function(event) {
       var image = document.getElementById('output');
       image.src = URL.createObjectURL(event.target.files[0]);
+      console.log(image.src);
+      $("#fileuploadbutton").click();
     };
     </script>
 
