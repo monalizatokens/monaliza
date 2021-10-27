@@ -196,4 +196,22 @@ $( document ).ready(function() {
         console.log(account);
     }
 
+
 });
+
+function childrenRow() {
+    /*var table = document.getElementById("childTable");
+    var row = table.insertRow(2);
+    //var cell1 = row.insertCell(0);
+    $('#childTable tbody tr').addClass("form-control");*/
+    $("#childTable").find('tbody')
+    .append($('<tr>')
+        .append($('<td>')
+            .append($('<input>')
+                .attr('type', 'text')
+                .attr('class', 'form-control')
+                //.class('form-control')
+            )
+        )
+    );
+ }

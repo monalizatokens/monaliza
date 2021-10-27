@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Monaliza</title>
+</head>
+
+<!--main navbar-->
+
+<body data-spy="scroll" data-target="#main-nav" id="home">
+      <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
+      <div class="container">
+          <a href="index1.html" class="navbar-brand font-weight-bold">Monaliza</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarcollapse">
+          <ul class="navbar-nav ml-auto h5">
+            <li class="nav-item">
+              <a class="nav-link" href="index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="market.html">Market</a>
+            </li>
+           <li class="nav-item">
+              <a class="nav-link" href="create.html">Create</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="airdrop.html">Airdrop</a>
+            </li>             
+            <li class="nav-item">
+              <a class="nav-link" href="claim.html">Claim</a>
+            </li> 
+          </ul>
+          
+            <button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>
+            <i class="fas fa-user-circle fa-2x ml-3"></i>
+        </div>
+       </div> 
+      </nav>
+
+      <div id="myProgress">
+        <div id="myBar"></div>
+      </div>
+      <!--main page-->
+      <header id="create-section">
+        <div class="container less-top-margin">
+          <div class="row justify-content-center">
+            <div class="col-sm-8">
+              <div class="form-group mb-5">
+                <p class="h4">Create Airdrop</p>
+                <!--<button type="button" class="btn btn-success btn-lg active" aria-pressed="true">Create Airdrop</button>-->
+                <!--<button type="button" class="btn btn-primary btn-lg">View Airdrop</button>-->
+              </div>
+                <p class="h5">Asset</p>
+                <div class="form-group mb-5">
+                  <label for="exampleFormControlSelect1">Select asset</label>
+                  <select class="form-control" id="exampleFormControlSelect1">
+                    <option>Antoine Griezmann NFT</option>
+                    <option>Paul Pogba NFT</option>
+                  </select>                  
+                  <small id="emailHelp" class="form-text text-muted">Select the asset for which you want to create airdrop.</small>
+                </div> 
+                <p class="h5">Airdrop Addresses</p>
+                <div class="form-group">
+                    <label for="childTable">Enter airdrop addresses</label>
+                    <table class="table table-bordered" id="childTable">
+                      <thead>
+                        <tr>
+                          <!--<th scope="col">No.</th>-->
+                          <!--<th scope="col">Address</th>-->
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <!--<th scope="row">1</th>-->
+                          <td class="col-sm-11">
+                            <input type="text" name="name" class="form-control" />
+                          </td>
+                          <td>
+                            <input type="button" class="btn btn-block btn-default" id="addrow" onclick="childrenRow()" value="+" />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>  
+                    <small id="emailHelp" class="form-text text-muted">Asset will be airdropped to all of these addresses.</small>
+                </div>
+              <!--<p class="h4">&nbsp;</p>            
+              <p class="h4">Airdrop</p>         
+              <div class="form-group">
+                <label for="exampleFormControlSelect2">Select Previous Airdrop (if any)</label>
+                <select class="form-control" id="exampleFormControlSelect2">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                </select>                  
+                <small id="emailHelp" class="form-text text-muted">Select previous airdrop in case it exists.</small>
+            </div> -->
+         </div>
+
+        <div class="container">
+         <div class="text-center">
+            <button id="create-asset-btn" type="submit" class="btn btn-primary btn-lg px-5 ">Submit Airdrop</button>  
+         </div>   
+        </div>
+       </div>
+      </div>    
+      </header>
+
+      <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+  crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+  crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.6.0/web3.min.js" integrity="sha512-+BhnLgfzIDDjssoEWHPmdgWRvbwIEdj0Xfiys7uSqfQWpMEOJ4ymJ88O6B1cB0j+4zjb5GhO+sb/kEicggvUQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src=js/bootstrap-show-notification.js></script>
+  <script src=js/asset-manager.js></script>
+  <script>
+    var loadFile = function(event) {
+      var image = document.getElementById('output');
+      image.src = URL.createObjectURL(event.target.files[0]);
+      console.log(image.src);
+      $("#fileuploadbutton").click();
+    };
+    </script>
+
+</body>
+</html>

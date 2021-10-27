@@ -56,3 +56,7 @@ width: 1%;
 height: 30px;
 background-color: rgb(44, 52, 155);
 }
+
+.less-top-margin{
+    margin-top: 30px !important;
+}
