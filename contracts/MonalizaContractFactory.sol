@@ -20,7 +20,7 @@ contract Monaliza is ERC721, Ownable {
         return newItemId;
     }
 
-    function tokenURI(uint256 _tokenId) external view returns (string);
+    /*function tokenURI(uint256 _tokenId) external view returns (string memory);*/
 
 }
 

@@ -1,4 +1,5 @@
 process.on('uncaughtException', (err) => {
+    console.log(err);
     console.log('whoops! there was an error');
  });
 
@@ -13,6 +14,50 @@ const fs = require('fs');
 const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
 const multer = require('multer');
+const JSONdb = require('simple-json-db');
+
+const db = new JSONdb('database.json', {});
+
+var allAssets = [];
+
+
+
+/*console.log(db.get('assets'));*/
+//allAssets.push({
+//    "a": "b"
+    /*"assetContractID": value.receipt.rawLogs[0].address,
+    "assetName": req.body.assetName,
+    "assetType": "ERC721",
+    "creatorAddress": req.body.creatorAddress,
+    "imageSrc": req.body.fileName,
+    "contentSrc": req.body.fileName,
+    "docURL": req.body.docURL,
+    "description": request.body.description*/
+//})  
+//db.set('assets', {assetDetails: allAssets});  
+//db.sync();
+
+//db.set('assets', {});
+/*db.set('assets', {
+        assetDetails: [
+            {
+                "assetContractID": "0xea52093e33227b58860856bdcbd1d456da3d4417",
+                "assetName": "ANtoine Griezmann NFT",
+                "assetType": "ERC721",
+                "creatorAddress":"0xea52093e33227b58860856bdcbd1d456da3d4417",
+                "imageSrc":"./sky.PNG",
+                "contentSrc":"./sky.PNG"
+            },
+            {
+                "assetContractID": "0xea52093e33227b58860856bdcbd1d456da3d4417",
+                "assetName": "New NFT",
+                "assetType": "ERC721",
+                "creatorAddress":"0xea52093e33227b58860856bdcbd1d456da3d4417",
+                "imageSrc":"./sky.PNG",
+                "contentSrc":"./sky.PNG"
+            }
+        ]
+    });*/
 
 //const HDWalletProvider = require("truffle-hdwallet-provider");
 
@@ -101,6 +146,88 @@ Monaliza.deployed().then(function(instance) {
     monalizaInstance = instance;
 })
 
+app.post('/createairdrop', (req, res, next) => {
+    console.log("Starting to createairdrop");
+    console.log(req.body);
+    //console.log("DB get airdrop");
+    //console.log(db.get('airdrops'));
+    var allAirdrops;
+    var airdropDetails;
+    try{
+        airdropDetails = db.get('airdrops').airdropDetails;
+        //console.log(airdropDetails);
+    }catch(e){
+
+    }
+
+    if(airdropDetails != undefined){
+        allAirdrops =  db.get('airdrops').airdropDetails;
+    }else{
+        allAirdrops = new Array();
+    }
+    allAirdrops.push({
+        "creatorAddress": req.body.creatorAddress,
+        "assetContractAddress": req.body.assetContractAddress,
+        "airdropAddresses": req.body.airdropAddresses,
+        "creationDate": req.body.creationDate,
+        "assetName": req.body.assetName,
+        "description": req.body.description,
+        "ipfsURL": req.body.ipfsURL,
+        "docURL": req.body.docURL,
+        "fileName": req.body.fileName
+    })  
+    db.set('airdrops', {"airdropDetails": allAirdrops});  
+    db.sync();
+    res.json({"message": "airdrop created successfully."})
+})
+
+app.get('/getairdropsforuser', (req, res, next) => {
+    console.log("In getairdropsforuser");
+    console.log(req.query.useraddress);
+    var userAddress = req.query.useraddress;
+    var allAirdrops =  db.get('airdrops').airdropDetails;
+    console.log(allAirdrops);
+    var userRelevantAssets = []
+    for(var i=0; i <allAirdrops.length; i++){
+        if(allAirdrops[i].airdropAddresses){
+            for(var j=0; j <allAirdrops[i].airdropAddresses.length; j++){
+                console.log(userAddress);
+                console.log(allAirdrops[i].airdropAddresses[j]);
+                if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
+                    var claimed = false;
+                    claimed = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
+                    userRelevantAssets.push({
+                        "creatorAddress": allAirdrops[i].creatorAddress,
+                        "assetContractAddress": allAirdrops[i].assetContractAddress,
+                        "creationDate": allAirdrops[i].creationDate,
+                        "assetName": allAirdrops[i].assetName,
+                        "ipfsURL": allAirdrops[i].ipfsURL,
+                        "description": allAirdrops[i].description,
+                        "fileName": allAirdrops[i].fileName,
+                        "claimed": claimed
+                    })
+                }
+            }
+        }
+    }
+
+    function checkAirdropClaimed(assetContractAddress, userAddress){
+        var claimed = false;
+        var allAirdropsClaimed;
+        var allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+        console.log(allAirdropsClaimedDetails);
+        for(var i=0; i <allAirdropsClaimedDetails.length; i++){
+            if((allAirdropsClaimedDetails[i].airdropAddress.toUpperCase() == userAddress.toUpperCase()) && (allAirdropsClaimedDetails[i].assetContractAddress.toUpperCase() == assetContractAddress.toUpperCase())){
+                claimed = true;
+            }
+        }
+        return claimed;
+      }
+
+    console.log(userRelevantAssets);  
+    res.json(userRelevantAssets);
+})
+
 app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
     if (!req.file) {
       console.error(`No file selected`)
@@ -119,79 +246,104 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
 
 app.post('/deploynftcontract', (req, res, next) => {
     console.log("Starting to execute deploynft");
+    console.log(req.body);
     //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
     var name = req.body.assetName;
     var symbol = req.body.assetSymbol;
+    var fileName = req.body.fileName;
     console.log(name + " " + symbol);
-    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 5000000})
+    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 6000000})
   .then(function(value) {
+    console.log(value);  
     console.log("NFT contract address " + value.receipt.rawLogs[0].address);
     console.log(value.receipt.rawLogs[0].address);
         res.json({"contractAddress": value.receipt.rawLogs[0].address});
 
+        const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
+        const options = {
+            pinataMetadata: {
+                name: "somename",
+                keyvalues: {
+                    customKey: 'customValue',
+                    customKey2: 'customValue2'
+                }
+            },
+            pinataOptions: {
+                cidVersion: 0
+            }
+        };
+        pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+            //handle results here
+            //console.log(result);
+            var allAssets =  db.get('assets').assetDetails;
+            allAssets.push({
+                "assetContractID": value.receipt.rawLogs[0].address,
+                "assetName": req.body.assetName,
+                "assetSymbol": req.body.assetSymbol,
+                "assetType": "ERC721",
+                "creatorAddress": req.body.creatorAddress,
+                "imageSrc": req.body.fileName,
+                "ipfsURL": "https://ipfs.io/ipfs/" + result.IpfsHash,
+                "contentSrc": req.body.fileName,
+                "docURL": req.body.docURL || '',
+                "description": req.body.description  || ''
+            })  
+            db.set('assets', {"assetDetails": allAssets});  
+            db.sync();
+        
+        }).catch((err) => {
+            //handle error here
+            console.log(err);
+        });
+    
+
     }).catch(function(err) {
-        console.log(err.message);
+        console.log(err);
     });
     //return monalizaInstance.mint(req.query.contractaddress, req.query.toaddress, req.query.tokenuri, {from: process.env.FROM_ACCOUNT, gas: 4600000});
 })
 
 
-app.post('/mintnft', (req, res) => {
+app.post('/claimairdrop', (req, res) => {
     console.log("NFT minting started");
+    console.log(req.body);
 
-    const readableStreamForFile = fs.createReadStream('./README.md');
-    const options = {
-        pinataMetadata: {
-            name: "somename",
-            keyvalues: {
-                customKey: 'customValue',
-                customKey2: 'customValue2'
-            }
-        },
-        pinataOptions: {
-            cidVersion: 0
-        }
-    };
-    pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
-        //handle results here
-        console.log(result);
-        var addresses = req.body.addresses;
-        console.log(addresses.length);
-        for(var i=0; i<addresses.length; i++){
-            console.log("NFT minting started from account " + FROM_ACCOUNT);
-            monalizaInstance.mintNFT(req.body.contractAddress, addresses[i], "https://ipfs.io/ipfs/" + result.IpfsHash, {from: FROM_ACCOUNT, gas: 4600000}).then
-            (function(result){
-                console.log("NFT minted transaction id is " + result.tx)
-            }).catch(function(err) {
-               console.log(err);
-            });
+    monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4600000}).then
+    (function(result){
+        console.log("NFT minted transaction id is " + result.tx);
+        //add to airdropped list and prevent duplicate claim
+        res.send({"txID": result.tx});
+        var allAirdropsClaimed;
+        var allAirdropsClaimedDetails;
+        try{
+            allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+            //console.log(airdropDetails);
+        }catch(e){
+    
         }
     
-    }).catch((err) => {
-        //handle error here
-        console.log(err);
+        if(allAirdropsClaimedDetails != undefined){
+            allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+        }else{
+            allAirdropsClaimed = new Array();
+        }
+        allAirdropsClaimed.push({
+            "assetContractAddress": req.body.assetContractAddress,
+            "airdropAddress": req.body.userAddress
+        })  
+        db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
+        console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
+        db.sync();
+   
+    }).catch(function(err) {
+       console.log(err);
     });
 
 
 
-    res.send('NFT Minting started!');
 
-    /*Monaliza.deployed().then(function(instance) {
-        monalizaInstance = instance;
-        console.log("Initiating deployment of NFT contract");
-        monalizaInstance.mintNFT(req.query.contractaddress, req.query.toaddress, req.query.tokenuri, {from: process.env.FROM_ACCOUNT, gas: 4600000}).then
-        (function(result){
-            console.log("NFT minted");
-            console.log(result.tx)
-        }).catch(function(err) {
-           //console.log(err);
-        });
-    }).then(function(result){
-            //console.log("NFT minted");
-            //console.log(result)
-        }).catch(function(err) {
-        console.log(err);
-        });*/
+
+   
 })
 
 app.post('/deployandmintnft_v2', (req, res) => {
@@ -334,6 +486,22 @@ app.get('/getmemetokenbalance', (req, res) => {
     request('https://api.covalenthq.com/v1/80001/address/' + req.query.address + '/balances_v2/?key=' + secretKey, function(err, res, body) {
     console.log(body);
 });
+})
+
+app.get('/assetsforuseraddress', function (req, res) {
+    var userAddress = req.query.useraddress;
+    console.log(userAddress);
+    var allAssets = db.get('assets');
+    console.log(allAssets);
+    var userCreatedAssets = [];
+    for(var i=0; i < allAssets.assetDetails.length; i++){
+        console.log(allAssets.assetDetails[i].creatorAddress);
+        if(userAddress == allAssets.assetDetails[i].creatorAddress){
+            userCreatedAssets.push(allAssets.assetDetails[i]);
+        }
+    }
+    console.log(userCreatedAssets);
+    res.json(userCreatedAssets);
 })
 
 app.listen(port, () => {
