@@ -2,3 +2,4 @@ node_modules
 public/uploads
 secret.json
 create-game-asset.html
+database.json

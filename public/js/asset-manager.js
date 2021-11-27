@@ -486,11 +486,12 @@ function addCardDeck(){
      }
 
      var formatDate = function(date) {
-        return date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear();
+        return date.getDate() + "-" + (date.getMonth() + 1)  + "-" + date.getFullYear();
       }
       
       var timestamp = assetDetails.creationDate;
-      var date = new Date(timestamp);
+      var date = formatDate(new Date(timestamp));
+      console.log(date);
 
       var buttonState = " disabled";
       var buttonText = "Already claimed"
@@ -507,7 +508,7 @@ function addCardDeck(){
             '<p class="card-text">'  + assetDescription  +  '</p>' +
             '</div>' +
             '<div class="card-footer">' +
-            '<small class="text-muted">' + "Airdropped on " + formatDate(date)  + '</small>' +
+            '<small class="text-muted">' + "Airdropped on " + date  + '</small>' +
             //'<div class="container">' +
                 '<div class="text-center mt-3">' +
                     '<button  ' + ' assetContractAddress=' +  '"' + assetDetails.assetContractAddress + '"'  + ' userAddress=' + '"' + userAccount  + '"'  + ' ipfsURL=' + '"' + assetDetails.ipfsURL  + '"'  + ' type="submit" class="btn btn-primary btn-lg mt-3 claim-airdrop-btn ' +  buttonState +  '">' +  buttonText + '</button>' +  
