@@ -1,8 +1,123 @@
 //We can call contract function from browser as well, see link below
 //https://ethereum.stackexchange.com/questions/25431/metamask-how-to-access-call-deployed-contracts-functions-using-metamask
 
+var airdrops;
+var msgHash;
+var provider;
 
 $( document ).ready(function() {
+    //const Web3Modal = window.Web3Modal.default;
+    "use strict";
+
+    /**
+     * Example JavaScript code that interacts with the page and Web3 wallets
+     */
+    
+     // Unpkg imports
+    const Web3Modal = window.Web3Modal.default;
+    const WalletConnectProvider = window.WalletConnectProvider.default;
+    const EvmChains = window.EvmChains;
+    const Fortmatic = window.Fortmatic;
+    const MewConnect = window.MewConnect;
+    //const Metamask = window.Metamask;
+    
+    // Web3modal instance
+    let web3Modal
+    
+    // Chosen wallet provider given by the dialog window
+    //let provider;
+    
+    
+    // Address of the selected account
+    let selectedAccount;
+    
+    
+    /**
+     * Setup the orchestra
+     */
+    function init() {
+    
+      console.log("Initializing example");
+      console.log("WalletConnectProvider is", WalletConnectProvider);
+      console.log("Fortmatic is", Fortmatic);
+    
+      // Tell Web3modal what providers we have available.
+      // Built-in web browser provider (only one can exist as a time)
+      // like MetaMask, Brave or Opera is added automatically by Web3modal
+      const providerOptions = {
+        walletconnect: {
+          package: WalletConnectProvider,
+          options: {
+            // Mikko's test key - don't copy as your mileage may vary
+            infuraId: "4b594ff9f9b04517a0320d94bf150c24"
+          }
+        },
+        mewconnect: {
+            package: MewConnect, // required
+            options: {
+                infuraId: "8043bb2cf99347b1bfadfb233c5325c0"
+            }
+          },
+
+        /*metamask: {
+            package: Metamask,
+            options: {
+              // Mikko's test key - don't copy as your mileage may vary
+              infuraId: "8043bb2cf99347b1bfadfb233c5325c0",
+            }
+          },*/
+    
+        fortmatic: {
+          package: Fortmatic,
+          options: {
+            // Mikko's TESTNET api key
+            key: "pk_test_391E26A3B43A3350"
+          }
+        }
+      };
+    
+      web3Modal = new Web3Modal({
+        cacheProvider: false, // optional
+        providerOptions, // required,
+        network: "rinkeby",
+      });
+
+      web3Modal.clearCachedProvider();
+    
+    }
+    
+    init();
+      async function onConnect() {
+
+          console.log("Opening a dialog", web3Modal);
+          try {
+            provider = await web3Modal.connect();
+            console.log(provider);
+            getAccount();
+            $(".connect-wallet-btn").html("Connected");
+          } catch(e) {
+            console.log("Could not get a wallet connection", e);
+            return;
+          }
+        
+          // Subscribe to accounts change
+          provider.on("accountsChanged", (accounts) => {
+            fetchAccountData();
+          });
+        
+          // Subscribe to chainId change
+          provider.on("chainChanged", (chainId) => {
+            fetchAccountData();
+          });
+        
+          // Subscribe to networkId change
+          provider.on("networkChanged", (networkId) => {
+            fetchAccountData();
+          });
+        
+          //await refreshAccountData();
+        }      
+
     var accountHere= ""
 
     $.showNotification({
@@ -54,15 +169,29 @@ $( document ).ready(function() {
             var validationStatus = validateFields();
             console.log(validationStatus);
             if(validationStatus == true){
-                const web3Instance = new Web3(window['ethereum']);
-                msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"), {encoding: "hex"})
-                //if (!accountHere) return connect()
-                var sign = "";
-                web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
+                var signedMessage;
+                async function signMessage(){
+                    const web3Instance = new Web3(provider);
+                    msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"), {encoding: "hex"})
+                    //if (!accountHere) return connect()
+                    var sign = "";
+                    web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
+                        if (err) return console.error(err)
+                        console.log('SIGNED:' + result)
+                        sign = result;
+                      })
+    
+
+                }
+
+                //signMessage();
+          
+          
+                /*web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
                     if (err) return console.error(err)
                     console.log('SIGNED:' + result)
                     sign = result;
-                  })
+                  })*/
     
                 var contractAddress= "", assetName = "", docURL = "", description = "", addressses = []
     
@@ -82,7 +211,7 @@ $( document ).ready(function() {
                     docURL: $("#docURL").val(),
                     description: $("#description").val(),
                     addresses: addressses,
-                    sign: sign
+                    sign: signedMessage
                 }
                 var url = "/deploynftcontract"
                 
@@ -194,14 +323,40 @@ $( document ).ready(function() {
 
     $(".connect-wallet-btn").click(function(){
         console.log("create-asset-connect-wallet-btn clicked");
-        if (typeof window.ethereum !== 'undefined') {
+        /*if (window.ethereum) {
+            handleEthereum();
+          } else {
+            window.addEventListener('ethereum#initialized', handleEthereum, {
+              once: true,
+            });
+          
+            // If the event is not dispatched by the end of the timeout,
+            // the user probably doesn't have MetaMask installed.
+            setTimeout(handleEthereum, 3000); // 3 seconds
+          }*/
+                  
+              onConnect();
+
+            function handleEthereum() {
+                const { ethereum } = window;
+                if (ethereum && ethereum.isMetaMask) {
+                console.log('Ethereum successfully detected!');
+                // Access the decentralized web!
+                getAccount();
+                $(".connect-wallet-btn").html("Connected");
+                } else {
+                    alert("Please install MetaMask");
+                console.log('Please install MetaMask!');
+                }
+            }
+        /*if (typeof window.ethereum !== 'undefined') {
             console.log('MetaMask is installed!');
             getAccount();
             $(this).html("Connected");
             
         }else{
             alert("Please install Metamask.");
-        }
+        }*/
     })
 
     $("#create-airdrop-btn").click(function(){
@@ -340,10 +495,16 @@ $( document ).ready(function() {
 
 
     async function getAccount() {
-        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        //const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const web3 = new Web3(provider);
+        const chainId = await web3.eth.getChainId();
+        console.log(evmChains.getChain(chainId));
+        const accounts = await web3.eth.getAccounts();
+
         const account = accounts[0];
         accountHere = account;
         console.log(account);
+        //alert(account);
         getAssets(account);
         loadClaimableAirdrops(account);
     }

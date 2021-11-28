@@ -11,6 +11,7 @@ const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bodyParser = require('body-parser')
 const request = require('request');
 const fs = require('fs');
+const https = require('https');
 const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
 const multer = require('multer');
@@ -19,6 +20,11 @@ const JSONdb = require('simple-json-db');
 const db = new JSONdb('database.json', {});
 
 var allAssets = [];
+
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+  };
 
 
 
@@ -83,7 +89,8 @@ var cors = require('cors')
 
 
 const app = express();
-const port = 4000;
+const httpsServer = https.createServer(options, app)
+const port = 443;
 
 //pp.use(express.static('src'));
 app.use(express.static("public"))
@@ -332,7 +339,7 @@ app.post('/claimairdrop', (req, res) => {
             "airdropAddress": req.body.userAddress
         })  
         db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
-        console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
+        //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
         db.sync();
    
     }).catch(function(err) {
@@ -504,6 +511,7 @@ app.get('/assetsforuseraddress', function (req, res) {
     res.json(userCreatedAssets);
 })
 
-app.listen(port, () => {
+httpsServer.listen(443)
+/*app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`)
-})
+})*/
