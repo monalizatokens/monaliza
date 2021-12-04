@@ -16,6 +16,7 @@ const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
 const multer = require('multer');
 const JSONdb = require('simple-json-db');
+const csv = require('csv-parser')
 
 const db = new JSONdb('database.json', {});
 
@@ -115,6 +116,8 @@ app.use(morgan('dev'));
         fileExtension = ".png"
       }else if(file.mimetype == "image/jpg"){
         fileExtension = ".jpg"
+      }else if(file.mimetype == "text/csv"){
+        fileExtension = ".csv"
       }
       cb(null, uniquePreFix + fileExtension);
     }
@@ -156,37 +159,93 @@ Monaliza.deployed().then(function(instance) {
 app.post('/createairdrop', (req, res, next) => {
     console.log("Starting to createairdrop");
     console.log(req.body);
-    //console.log("DB get airdrop");
-    //console.log(db.get('airdrops'));
-    var allAirdrops;
-    var airdropDetails;
-    try{
-        airdropDetails = db.get('airdrops').airdropDetails;
-        //console.log(airdropDetails);
-    }catch(e){
-
-    }
-
-    if(airdropDetails != undefined){
-        allAirdrops =  db.get('airdrops').airdropDetails;
-    }else{
-        allAirdrops = new Array();
-    }
-    allAirdrops.push({
-        "creatorAddress": req.body.creatorAddress,
-        "assetContractAddress": req.body.assetContractAddress,
-        "airdropAddresses": req.body.airdropAddresses,
-        "creationDate": req.body.creationDate,
-        "assetName": req.body.assetName,
-        "description": req.body.description,
-        "ipfsURL": req.body.ipfsURL,
-        "docURL": req.body.docURL,
-        "fileName": req.body.fileName
-    })  
-    db.set('airdrops', {"airdropDetails": allAirdrops});  
-    db.sync();
+    createAirDrops(req);
     res.json({"message": "airdrop created successfully."})
 })
+
+function createAirDrops(req){
+    var airdropAddresses = [];
+    if(req.body.airdropAddressesMode == "file"){
+        const results = [];
+        
+        fs.createReadStream('./public/uploads/' + req.body.airdropAddressesFileName)
+        .pipe(csv({headers: false}))
+        .on('data', (data) => results.push(data))
+        .on('end', () => {
+            console.log(results);
+            for(var i=0; i <results.length; i++){
+                console.log(results[i]["0"])
+                airdropAddresses.push(results[i]["0"]);
+            }
+            console.log("Printing airdrop addresses in file mode");
+            console.log(airdropAddresses);
+
+            var allAirdrops;
+            var airdropDetails;
+            try{
+                airdropDetails = db.get('airdrops').airdropDetails;
+                //console.log(airdropDetails);
+            }catch(e){
+
+            }
+
+            if(airdropDetails != undefined){
+                allAirdrops =  db.get('airdrops').airdropDetails;
+            }else{
+                allAirdrops = new Array();
+            }
+            allAirdrops.push({
+                "creatorAddress": req.body.creatorAddress,
+                "assetContractAddress": req.body.assetContractAddress,
+                "airdropAddresses": airdropAddresses,
+                "creationDate": req.body.creationDate,
+                "assetName": req.body.assetName,
+                "description": req.body.description,
+                "ipfsURL": req.body.ipfsURL,
+                "docURL": req.body.docURL,
+                "fileName": req.body.fileName
+            })  
+            db.set('airdrops', {"airdropDetails": allAirdrops});  
+            db.sync();
+            // [
+            //   { NAME: 'Daffy Duck', AGE: '24' },
+            //   { NAME: 'Bugs Bunny', AGE: '22' }
+            // ]
+        });
+    }else{
+        airdropAddresses = req.body.airdropAddresses;
+        console.log("Printing airdrop addresses in mnaual entry mode");
+        console.log(airdropAddresses);
+        var allAirdrops;
+        var airdropDetails;
+        try{
+            airdropDetails = db.get('airdrops').airdropDetails;
+            //console.log(airdropDetails);
+        }catch(e){
+
+        }
+
+        if(airdropDetails != undefined){
+            allAirdrops =  db.get('airdrops').airdropDetails;
+        }else{
+            allAirdrops = new Array();
+        }
+        allAirdrops.push({
+            "creatorAddress": req.body.creatorAddress,
+            "assetContractAddress": req.body.assetContractAddress,
+            "airdropAddresses": airdropAddresses,
+            "creationDate": req.body.creationDate,
+            "assetName": req.body.assetName,
+            "description": req.body.description,
+            "ipfsURL": req.body.ipfsURL,
+            "docURL": req.body.docURL,
+            "fileName": req.body.fileName
+        })  
+        db.set('airdrops', {"airdropDetails": allAirdrops});  
+        db.sync();
+    }
+}
+
 
 app.get('/getairdropsforuser', (req, res, next) => {
     console.log("In getairdropsforuser");

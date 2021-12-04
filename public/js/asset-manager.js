@@ -4,6 +4,8 @@
 var airdrops;
 var msgHash;
 var provider;
+var validationStatus;
+var airdropAddressesMode;
 
 $( document ).ready(function() {
     //const Web3Modal = window.Web3Modal.default;
@@ -130,6 +132,7 @@ $( document ).ready(function() {
     });
 
     localStorage.setItem('fileName', ''); 
+    localStorage.setItem('airdropAddressesFileName', ''); 
     
     console.log( "ready!" );
     $("#myProgress").hide();
@@ -146,6 +149,9 @@ $( document ).ready(function() {
             contentType: false,
             success: function(result){
                 console.log(result);
+                console.log($("#file-name"))
+                $("#file-name").text(result.file.originalname);
+                localStorage.setItem('airdropAddressesFileName', result.file.filename);  
                 if(result.success == false){
                     $.showNotification({
                         body:"<h3>Please select a file.</h3>"
@@ -381,7 +387,7 @@ $( document ).ready(function() {
             }else if(checkEmptyAddressRows()){
                 console.log("Doing checkEmptyAddressRows");
                 $.showNotification({
-                    body:"<h3>" + "Please make sure there are no empty airdrop addresses." + "</h3>",
+                    body:"<h3>" + "Please make sure there are no empty airdrop addresses or use a csv file to upload addresses." + "</h3>",
                     duration: 1200,
                     maxWidth:"820px",
                     shadow:"0 2px 6px rgba(0,0,0,0.2)",
@@ -391,17 +397,28 @@ $( document ).ready(function() {
                 return;
             }else{
                 console.log("came in else");
+                var airdropAddressesFileName;
                 var airDropAddresses = [];
-                $('#addressTable >tbody >tr').each(function() {
-                    var address = $(this).find("td:eq(0)  input[type='text']").val();
-                    airDropAddresses.push(address);    
-                })
+                if($( "#addressTable " ).hasClass( "invisible" )){
+                    airdropAddressesMode = "file";
+                    airdropAddressesFileName = localStorage.getItem("airdropAddressesFileName");
+                }else{
+                    $('#addressTable >tbody >tr').each(function() {
+                        airdropAddressesMode = "manualEntry";
+                        var address = $(this).find("td:eq(0)  input[type='text']").val();
+                        airDropAddresses.push(address);    
+                    })
+                }    
+
+ 
                 //Get file name of asset image on disk
                 //Get NFT contract address of asset
                 //Make Ajax call to mintnft() post method
                 var data = {
                     "creatorAddress": accountHere,
                     "assetContractAddress": $("#assetList > option")[0].id,
+                    "airdropAddressesMode": airdropAddressesMode,
+                    "airdropAddressesFileName": airdropAddressesFileName,
                     "airdropAddresses": airDropAddresses,
                     "creationDate": new Date(),
                     "assetName": $("#assetList > option")[0].text,
@@ -435,13 +452,22 @@ $( document ).ready(function() {
     
     function checkEmptyAddressRows(){
         var emptyAddressRows = false;
-        var rowCount = $('#addressTable >tbody >tr').length;
-        $('#addressTable >tbody >tr').each(function() {
-            var address = $(this).find("td:eq(0)  input[type='text']").val();
-            console.log(address);
-            if(address == '') emptyAddressRows = true;
-        })
-        console.log(emptyAddressRows);
+        if(airdropAddressesMode == "file"){
+            if(localStorage.getItem("airdropAddressesFileName")){
+                emptyAddressRows = false
+            }else{
+                emptyAddressRows = true
+            }
+        }else{
+            var rowCount = $('#addressTable >tbody >tr').length;
+            $('#addressTable >tbody >tr').each(function() {
+                var address = $(this).find("td:eq(0)  input[type='text']").val();
+                console.log(address);
+                if(address == '') emptyAddressRows = true;
+            })
+            console.log(emptyAddressRows);
+        }
+         
         return emptyAddressRows;
     }
 

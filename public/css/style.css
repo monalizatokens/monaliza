@@ -60,3 +60,5 @@ background-color: rgb(44, 52, 155);
 .less-top-margin{
     margin-top: 30px !important;
 }
+
+.invisible { display: none; }

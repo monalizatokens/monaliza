@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp"
     crossorigin="anonymous">
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
   <link rel="stylesheet" href="css/style.css">
   <title>Monaliza</title>
 </head>
@@ -69,6 +70,39 @@
                 <p class="h5">Airdrop Addresses</p>
                 <div class="form-group">
                     <label for="addressTable">Enter airdrop addresses</label>
+                    <div id="address-entry-selection" class="btn-group btn-group-toggle mb-2" data-toggle="buttons" style="float: right;">
+                      <label class="btn btn-dark active">
+                        <input type="radio" name="options" id="manual-entry" autocomplete="off"> Manual entry
+                      </label>
+                      <label class="btn btn-dark">
+                        <input type="radio" name="options" id="upload-file" autocomplete="off" checked> CSV file upload
+                      </label>
+                    </div>
+                    <!--<input type="button" class="btn btn-primary mb-2" style="float: right;" id="enable-csv-upload" onclick="enableCsvUpload()" value="Upload CSV file" />-->
+                    <div id="csv-upload-div" class="text-center styling invisible mt-3">
+                      <!--<p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
+                      <p><label for="file" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
+                      <p><img id="output" width="200" /></p>-->
+                      <iframe name="votar" style="display:none;"></iframe>
+                      <form id = "fileuploaderform"
+                        target="votar"
+                        enctype="multipart/form-data" 
+                        method="post">
+                       <div class="form-group">
+                        <input type="file" aaccept=".csv" id="file-to-upload" name="file-to-upload" onchange="loadFile(event)" style="display: none;">
+                        <!--<p><input type="file"  accept="image/*" name="image" id="file-to-upload"  onchange="loadFile(event)" style="display: none;"></p>-->
+                        <p><label for="file-to-upload" style="cursor: pointer;"> <i class="fas fa-file-csv fa-5x mt-5" style="color:lightgrey"></i><br>Upload only .csv file</label></p>
+                        <p><label id="file-name" width="100"></label></p>
+                       </div>
+                       <input 
+                         type="submit" 
+                         id="fileuploadbutton"
+                         class="btn btn-primary" 
+                         value="Upload" style="display: none;">
+                      </form>
+  
+                     </div> 
+
                     <table class="table table-bordered" id="addressTable">
                       <thead>
                         <tr>
@@ -128,11 +162,24 @@
   <script src=js/asset-manager.js></script>
   <script>
     var loadFile = function(event) {
-      var image = document.getElementById('output');
+      var image = document.getElementById('file-name');
       image.src = URL.createObjectURL(event.target.files[0]);
       console.log(image.src);
       $("#fileuploadbutton").click();
     };
+
+    $("#address-entry-selection :input").change(function() {
+      console.log(this.id); // points to the clicked input button
+      if(this.id == "upload-file"){
+        $("#addressTable").addClass( "invisible" );
+        $("#csv-upload-div").removeClass( "invisible" );
+        airdropAddressesMode = "file"
+      }else if(this.id == "manual-entry"){
+        $("#addressTable").removeClass( "invisible" );
+        $("#csv-upload-div").addClass( "invisible" );
+        airdropAddressesMode = "manualEntry"
+      }
+    });
 
   </script>
 
