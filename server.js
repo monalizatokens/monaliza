@@ -282,21 +282,46 @@ app.post('/deploynftcontract', (req, res, next) => {
         pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
             //handle results here
             //console.log(result);
-            var allAssets =  db.get('assets').assetDetails;
-            allAssets.push({
-                "assetContractID": value.receipt.rawLogs[0].address,
-                "assetName": req.body.assetName,
-                "assetSymbol": req.body.assetSymbol,
-                "assetType": "ERC721",
-                "creatorAddress": req.body.creatorAddress,
-                "imageSrc": req.body.fileName,
-                "ipfsURL": "https://ipfs.io/ipfs/" + result.IpfsHash,
-                "contentSrc": req.body.fileName,
-                "docURL": req.body.docURL || '',
-                "description": req.body.description  || ''
-            })  
-            db.set('assets', {"assetDetails": allAssets});  
-            db.sync();
+           //prepare metadata object
+           var metadata= {
+            "name": "A name for this NFT",
+            "description": "An in-depth description of the NFT",
+            "image": "ipfs://" + result.IpfsHash
+        }
+        //Create metadata URI
+        //TODO
+            const metadataOptions = {
+                pinataMetadata: {
+                    name: "metadata",
+                    keyvalues: {
+                        customKey: 'customValue',
+                        customKey2: 'customValue2'
+                    }
+                },
+                pinataOptions: {
+                    cidVersion: 0
+                }
+            };
+            pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                var allAssets =  db.get('assets').assetDetails;
+                allAssets.push({
+                    "assetContractID": value.receipt.rawLogs[0].address,
+                    "assetName": req.body.assetName,
+                    "assetSymbol": req.body.assetSymbol,
+                    "assetType": "ERC721",
+                    "creatorAddress": req.body.creatorAddress,
+                    "imageSrc": req.body.fileName,
+                    "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                    "contentSrc": req.body.fileName,
+                    "docURL": req.body.docURL || '',
+                    "description": req.body.description  || ''
+                })  
+                db.set('assets', {"assetDetails": allAssets});  
+                db.sync();
+            }).catch((err) => {
+                //handle error here
+                console.log(err);
+            });
         
         }).catch((err) => {
             //handle error here
