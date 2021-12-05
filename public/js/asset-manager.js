@@ -81,7 +81,8 @@ $( document ).ready(function() {
       web3Modal = new Web3Modal({
         cacheProvider: false, // optional
         providerOptions, // required,
-        network: "rinkeby",
+        //network: "rinkeby",
+        network: "Matic Mumbai",
       });
 
       web3Modal.clearCachedProvider();
