@@ -528,7 +528,7 @@ $( document ).ready(function() {
         //const networkType = await web3.eth.get
         console.log(evmChains.getChain(chainId));
         $.showNotification({
-            body:"<h3>" + "Connected to chain ID " + evmChains.getChain(chainId) + ".</h3>"
+            body:"<h3>" + "Connected to chain " + evmChains.getChain(chainId).chain + " with chain ID " + evmChains.getChain(chainId).chainId + " on network " + evmChains.getChain(chainId).network + ".</h3>"
         })
         const accounts = await web3.eth.getAccounts();
 
