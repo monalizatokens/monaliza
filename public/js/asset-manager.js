@@ -525,10 +525,10 @@ $( document ).ready(function() {
         //const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         const web3 = new Web3(provider);
         const chainId = await web3.eth.getChainId();
-        const networkType = await web3.eth.getNetworkType();
+        //const networkType = await web3.eth.get
         console.log(evmChains.getChain(chainId));
         $.showNotification({
-            body:"<h3>" + "Connected to chain ID " + evmChains.getChain(chainId) + " on network " +  networkType + ".</h3>"
+            body:"<h3>" + "Connected to chain ID " + evmChains.getChain(chainId) + ".</h3>"
         })
         const accounts = await web3.eth.getAccounts();
 
