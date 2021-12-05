@@ -82,7 +82,7 @@ $( document ).ready(function() {
         cacheProvider: false, // optional
         providerOptions, // required,
         //network: "rinkeby",
-        network: "Matic Mumbai",
+        //network: "Matic Mumbai",
       });
 
       web3Modal.clearCachedProvider();
