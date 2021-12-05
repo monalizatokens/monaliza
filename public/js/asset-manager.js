@@ -49,6 +49,7 @@ $( document ).ready(function() {
       const providerOptions = {
         walletconnect: {
           package: WalletConnectProvider,
+          host: "https://rpc-mumbai.maticvigil.com/v1/8c7e9f0faa20639a2e13c38697d43fb2c3812d40",
           options: {
             // Mikko's test key - don't copy as your mileage may vary
             infuraId: "4b594ff9f9b04517a0320d94bf150c24"
