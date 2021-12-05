@@ -8,9 +8,9 @@ contract Monaliza is ERC721, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor(string memory myName, string memory mySymbol) 
-    ERC721(myName, mySymbol)
-    public {}
+    constructor(string memory tokenName, string memory symbol) public ERC721(tokenName, symbol) {
+        //_setBaseURI("ipfs://");
+    }
 
     function mint(address to, string memory tokenURI) public returns (uint256){
         _tokenIds.increment();

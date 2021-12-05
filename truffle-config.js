@@ -1,10 +1,10 @@
 //const HDWalletProvider = require("@truffle/hdwallet-provider");
 require('dotenv').config();
-const HDWalletProvider = require("truffle-hdwallet-provider");
+//const HDWalletProvider = require("truffle-hdwallet-provider");
 
 //const mnemonic = require("/secrets/secret.json").secret;
 //const RINKEBY_RPC_URL= require("/secrets/secret.json").rinkeby_rpc_url;
-
+const HDWalletProvider = require("@truffle/hdwallet-provider");
 const mnemonic = require("./secret.json").secret;
 const RINKEBY_RPC_URL= require("./secret.json").rinkeby_rpc_url;
 console.log(RINKEBY_RPC_URL);
@@ -34,15 +34,16 @@ module.exports = {
     },
     maticmumbai: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "https://rpc-mumbai.matic.today") 
+        return new HDWalletProvider(mnemonic, "https://rpc-mumbai.maticvigil.com/v1/8c7e9f0faa20639a2e13c38697d43fb2c3812d40") 
       },
-      network_id: "*",
+      network_id: 80001,
       chainId: 80001,
       confirmations: 2,
       timeoutBlocks: 200,
       skipDryRun: true,
       gas: 9721975,
-      gasPrice: 20000000000
+      gasPrice: 20000000000,
+      networkCheckTimeout: 100000
     },
     bsctestnet: {
       networkCheckTimeout: 10000,
