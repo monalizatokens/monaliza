@@ -260,8 +260,9 @@ app.get('/getairdropsforuser', (req, res, next) => {
                 console.log(userAddress);
                 console.log(allAirdrops[i].airdropAddresses[j]);
                 if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
-                    var claimed = false;
-                    claimed = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
+                    var claimDetails = {}
+                    claimDetails.claimed = false;
+                    claimDetails = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
                     userRelevantAssets.push({
                         "creatorAddress": allAirdrops[i].creatorAddress,
                         "assetContractAddress": allAirdrops[i].assetContractAddress,
@@ -270,7 +271,8 @@ app.get('/getairdropsforuser', (req, res, next) => {
                         "ipfsURL": allAirdrops[i].ipfsURL,
                         "description": allAirdrops[i].description,
                         "fileName": allAirdrops[i].fileName,
-                        "claimed": claimed
+                        "claimed": claimDetails.claimed,
+                        "tokenID": claimDetails.tokenID
                     })
                 }
             }
@@ -278,16 +280,18 @@ app.get('/getairdropsforuser', (req, res, next) => {
     }
 
     function checkAirdropClaimed(assetContractAddress, userAddress){
-        var claimed = false;
+        var claimDetails = {}
+        claimDetails.claimed = false;
         var allAirdropsClaimed;
         var allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
         console.log(allAirdropsClaimedDetails);
         for(var i=0; i <allAirdropsClaimedDetails.length; i++){
             if((allAirdropsClaimedDetails[i].airdropAddress.toUpperCase() == userAddress.toUpperCase()) && (allAirdropsClaimedDetails[i].assetContractAddress.toUpperCase() == assetContractAddress.toUpperCase())){
-                claimed = true;
+                claimDetails.claimed = true;
+                claimDetails.tokenID = allAirdropsClaimedDetails[i].tokenID;
             }
         }
-        return claimed;
+        return claimDetails;
       }
 
     console.log(userRelevantAssets);  
@@ -343,8 +347,8 @@ app.post('/deploynftcontract', (req, res, next) => {
             //console.log(result);
            //prepare metadata object
            var metadata= {
-            "name": "A name for this NFT",
-            "description": "An in-depth description of the NFT",
+            "name": req.body.assetName,
+            "description": req.body.description,
             "image": "ipfs://" + result.IpfsHash
         }
         //Create metadata URI
@@ -403,7 +407,9 @@ app.post('/claimairdrop', (req, res) => {
     (function(result){
         console.log("NFT minted transaction id is " + result.tx);
         //add to airdropped list and prevent duplicate claim
-        res.send({"txID": result.tx});
+        console.log(result);
+        console.log("tokenID is " + result.receipt.logs[0].args.newItemId);
+        res.send({"txID": result.tx, assetContractID: req.body.assetContractAddress, tokenID: result.receipt.logs[0].args.newItemId});
         var allAirdropsClaimed;
         var allAirdropsClaimedDetails;
         try{
@@ -420,7 +426,8 @@ app.post('/claimairdrop', (req, res) => {
         }
         allAirdropsClaimed.push({
             "assetContractAddress": req.body.assetContractAddress,
-            "airdropAddress": req.body.userAddress
+            "airdropAddress": req.body.userAddress,
+            "tokenID": result.receipt.logs[0].args.newItemId
         })  
         db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
         //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);

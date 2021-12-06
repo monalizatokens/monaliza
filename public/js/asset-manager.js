@@ -476,6 +476,7 @@ $( document ).ready(function() {
     $(".col-sm-12").on("click", ".claim-airdrop-btn", function(){
         console.log("claim-airdrop-btn clicked");
         console.log($( this ).hasClass("disabled"));
+        var assetContractAddress = $( this ).attr("assetcontractaddress");
         if(! ($( this ).hasClass("disabled"))){
             console.log($( this ).attr("assetcontractaddress"));
             if($(".connect-wallet-btn").html() == "Connect Wallet"){
@@ -509,6 +510,7 @@ $( document ).ready(function() {
                                 duration: 12000,
                                 body:"<h3>Airdrop claimed successfully. Add asset to Metamask with contract address " + claimData.assetContractAddress  + "</h3>"
                         })
+                        $("." + assetContractAddress).find(".nft-token-id").html('<small>NFT Token ID: '    + result.tokenID +  '</small>');
                         }else {
                             $.showNotification({
                                 body:"<h3>Airdrop couldn't be claimed. Please try again.</h3>"
@@ -692,13 +694,16 @@ function addCardDeck(){
         buttonState = "";
         buttonText = "Claim"
       }
-
+     var assetTokenID =  assetDetails.tokenID == undefined ? '' : assetDetails.tokenID;
+     var uniqueCardID = assetDetails.assetContractAddress + assetTokenID;
      var card = 
-        '<div class="card">' +
+        '<div class="card ' + uniqueCardID + '">' +
             '<img class="card-img-top"  src="' + "/uploads/" + assetDetails.fileName + '" alt="Card image cap">' +
             '<div class="card-body">' +
             '<h5 class="card-title">'  +  assetDetails.assetName + '</h5>' +
             '<p class="card-text">'  + assetDescription  +  '</p>' +
+            '<p class="card-text nft-contract-address"><small>NFT Contract Address: '  + assetDetails.assetContractAddress  +  '</small></p>' +
+            '<p class="card-text nft-token-id"><small>NFT Token ID: '    + assetTokenID  +  '</small></p>' +
             '</div>' +
             '<div class="card-footer">' +
             '<small class="text-muted">' + "Airdropped on " + date  + '</small>' +

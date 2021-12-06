@@ -8,6 +8,7 @@ contract Monaliza is ERC721, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
+
     constructor(string memory tokenName, string memory symbol) public ERC721(tokenName, symbol) {
         //_setBaseURI("ipfs://");
     }
@@ -26,7 +27,8 @@ contract Monaliza is ERC721, Ownable {
 
 contract MonalizaContractFactory {
     address[] public contracts;
-    address public lastContractAddress;  
+    address public lastContractAddress; 
+    event Mint(uint256 newItemId); 
 
     function getContractCount() public view returns(uint contractCount) {
         return contracts.length;
@@ -41,9 +43,13 @@ contract MonalizaContractFactory {
          return cAddr;
     }
 
-    function mintNFT(Monaliza tokenAddress, address to, string memory tokenURI) public {
+    function mintNFT(Monaliza tokenAddress, address to, string memory tokenURI) public returns(uint256 newItemId) {
 
-      tokenAddress.mint(to, tokenURI);
+      newItemId = tokenAddress.mint(to, tokenURI);
+      emit Mint(newItemId);
+      return newItemId;
     }    
+
+
 
 }
