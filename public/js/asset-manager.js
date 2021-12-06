@@ -698,7 +698,8 @@ function addCardDeck(){
      var uniqueCardID = assetDetails.assetContractAddress + assetTokenID;
      var card = 
         '<div class="card ' + uniqueCardID + '">' +
-            '<img class="card-img-top"  src="' + "/uploads/" + assetDetails.fileName + '" alt="Card image cap">' +
+            //'<img class="card-img-top"  src="' + "/uploads/" + assetDetails.fileName + '" alt="Card image cap">' +
+            '<video class="card-img-top"  src="' + "/uploads/" + assetDetails.fileName + '" alt="Card image cap" autoplay controls></video>' +
             '<div class="card-body">' +
             '<h5 class="card-title">'  +  assetDetails.assetName + '</h5>' +
             '<p class="card-text">'  + assetDescription  +  '</p>' +

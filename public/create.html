@@ -53,9 +53,12 @@
           <div class="row justify-content-center">
             <div class="col-sm-8">
               <div>
-                   <p class="h4">Asset image</p>
-                    <h5>Image</h5>
-                    <p class="text-dark">File types supported: JPG, PNG Max size: 100 MB </p>                 
+                   <!--<p class="h4">Asset image</p>-->
+                    <p class="h4">Asset video</p>
+                    <!--<h5>Image</h5>-->
+                    <h5>Video</h5>
+                    <!--<p class="text-dark">File types supported: JPG, PNG Max size: 100 MB </p>-->
+                   <p class="text-dark">File types supported: mp4 Max size: 100 MB </p>                 
                    <div class="text-center styling">
                     <!--<p><input type="file"  accept="image/*" name="image" id="file"  onchange="loadFile(event)" style="display: none;"></p>
                     <p><label for="file" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
@@ -66,9 +69,11 @@
                       enctype="multipart/form-data" 
                       method="post">
                      <div class="form-group">
-                      <input type="file" accept="image/*" id="file-to-upload" name="file-to-upload" onchange="loadFile(event)" style="display: none;">
+                      <!--<input type="file" accept="image/*" id="file-to-upload" name="file-to-upload" onchange="loadFile(event)" style="display: none;">-->
+                      <input type="file" accept="video/mp4,video/x-m4v,video/*" id="file-to-upload" name="file-to-upload" onchange="loadFile(event)" style="display: none;">
                       <!--<p><input type="file"  accept="image/*" name="image" id="file-to-upload"  onchange="loadFile(event)" style="display: none;"></p>-->
-                      <p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>
+                      <!--<p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>-->
+                      <p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Video</label></p>
                       <p><img id="output" width="100" /></p>
                      </div>
                      <input 

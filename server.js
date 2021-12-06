@@ -118,6 +118,8 @@ app.use(morgan('dev'));
         fileExtension = ".jpg"
       }else if(file.mimetype == "text/csv"){
         fileExtension = ".csv"
+      }else if(file.mimetype == "video/mp4"){
+        fileExtension = ".mp4"
       }
       cb(null, uniquePreFix + fileExtension);
     }
@@ -322,7 +324,7 @@ app.post('/deploynftcontract', (req, res, next) => {
     var symbol = req.body.assetSymbol;
     var fileName = req.body.fileName;
     console.log(name + " " + symbol);
-    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 6000000})
+    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 3000000})
   .then(function(value) {
     console.log(value);  
     console.log("NFT contract address " + value.receipt.rawLogs[0].address);
