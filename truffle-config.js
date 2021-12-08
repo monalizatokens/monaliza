@@ -34,16 +34,20 @@ module.exports = {
     },
     maticmumbai: {
       provider: function() {
-        return new HDWalletProvider(mnemonic, "https://rpc-mumbai.maticvigil.com/v1/8c7e9f0faa20639a2e13c38697d43fb2c3812d40") 
+        return new HDWalletProvider(mnemonic, "https://rpc-mumbai.maticvigil.com/v1/8c7e9f0faa20639a2e13c38697d43fb2c3812d40")
+        //return new HDWalletProvider(mnemonic, "wss://polygon-mumbai.g.alchemy.com/v2/spanmhhGSA-8chSUSWtbrjq2BPJjVLwa") 
+        //return new HDWalletProvider(mnemonic, "https://polygon-mumbai.g.alchemy.com/v2/spanmhhGSA-8chSUSWtbrjq2BPJjVLwa") 
+        //return new HDWalletProvider(mnemonic, "https://matic-mumbai--rpc.datahub.figment.io/apikey/16d99b534329b6dab67e8293f8858d42")
       },
       network_id: 80001,
       chainId: 80001,
-      confirmations: 2,
+      confirmations: 1,
       timeoutBlocks: 200,
       skipDryRun: true,
-      gas: 9721975,
-      gasPrice: 20000000000,
+      gas: 9521975,
+      gasPrice: 5000000000,
       networkCheckTimeout: 100000
+
     },
     bsctestnet: {
       networkCheckTimeout: 10000,
@@ -58,7 +62,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "^0.6.0"     // Fetch exact version from solc-bin (default: truffle's version)
+      version: " ^0.8.0"     // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {

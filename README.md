@@ -3,7 +3,14 @@
 To run:  
 node server.js
   
-  
+
+To deploy solidity contract:
+https://ethereum.org/hr/developers/tutorials/how-to-mint-an-nft/  
+npx hardhat compile  
+npx hardhat run scripts/deploy.js --network matic  
+
+
+
   
 old
 1. Run command "truffle migrate --network rinkeby"

@@ -4,7 +4,7 @@ process.on('uncaughtException', (err) => {
  });
 
 var TruffleContract = require("@truffle/contract");
-let MonalizaArtifact = require("./build/contracts/MonalizaContractFactory.json");
+let MonalizaArtifact = require("./build/contracts/MonalizaFactory.json");
 let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
@@ -19,6 +19,19 @@ const JSONdb = require('simple-json-db');
 const csv = require('csv-parser')
 
 const db = new JSONdb('database.json', {});
+const ffmpeg = require('ffmpeg-static');
+console.log(ffmpeg);
+const genThumbnail = require('simple-thumbnail');
+
+require("dotenv").config()
+const API_URL = process.env.API_URL
+const PUBLIC_KEY = process.env.PUBLIC_KEY
+const PRIVATE_KEY = process.env.PRIVATE_KEY
+console.log(API_URL)
+const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
+const alchemyWeb3 = createAlchemyWeb3(API_URL)
+const { ethers } = require("hardhat");
+//const ethers = require("@nomiclabs/hardhat-ethers");
 
 var allAssets = [];
 
@@ -82,10 +95,90 @@ const pinata_api_secret = require("./secret.json").pinata_api_secret;
 const pinata = pinataSDK(pinata_api_key, pinata_api_secret);
 
 var Web3 = require("web3");
+
 const express = require("express");
 //const { request } = require("express");
 require('dotenv').config();
 var cors = require('cors')
+
+const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
+
+var monalizaFactoryContractAddress = "0x2de01bad0EC51F9f02d298aCc8c2105F5c1cc43D";
+//const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
+
+async function testhh(){
+    //const Token = await ethers.getContractFactory("Token");
+    //const accounts = await ethers.provider.listAccounts();
+    //console.log(accounts);
+    //const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+    //console.log(MonalizaFactory);
+    //const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+    /*const nftContract = new alchemyWeb3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
+    const nonce = await alchemyWeb3.eth.getTransactionCount(PUBLIC_KEY, 'latest'); //get latest nonce
+    console.log(nonce)
+    const tx = {
+        'from': PUBLIC_KEY,
+        'to': monalizaFactoryContractAddress,
+        'nonce': nonce,
+        'gas': 500000,
+        'data': nftContract.methods.deployNFTContract("TST", "TST").encodeABI()
+      };*/
+      /*const signPromise = alchemyWeb3.eth.accounts.signTransaction(tx, PRIVATE_KEY)
+      signPromise
+        .then((signedTx) => {
+          alchemyWeb3.eth.sendSignedTransaction(
+            signedTx.rawTransaction,
+            function (err, hash) {
+              if (!err) {
+                console.log(
+                  "The hash of your transaction is: ",
+                  hash,
+                  "\nCheck Alchemy's Mempool to view the status of your transaction!"
+                )
+              } else {
+                console.log(
+                  "Something went wrong when submitting your transaction:",
+                  err
+                )
+              }
+            }
+          ).on('receipt', receipt => { console.log('Receipt: ', JSON.stringify(receipt)); });
+        })
+        .catch((err) => {
+          console.log(" Promise failed:", err)
+        })
+    console.log(signPromise);*/
+
+    const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+    //console.log(MonalizaFactory);
+    const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+    var sendPromise = monalizaFactory.deployNFTContract("TST", "TST");
+    sendPromise.then(function(transaction){
+        console.log(transaction);
+      });
+    
+    monalizaFactory.on("DeployContract", (name, symbol, address) => {
+        console.log(address);
+    });
+
+    //const address = await monalizaFactory.deployNFTContract("TST", "TST");
+    //console.log(address);
+        //var out = await monalizaFactory.deployNFTContract("TST", "TST", { gasPrice: 5000000000, gasLimit: 9521975})
+        //console.log(out);
+    //console.log(monalizaFactory)
+    //const nftFactoryContract = new alchemyWeb3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
+    //console.log(nftFactoryContract);
+    /*var out = await nftFactoryContract.methods.deployNFTContract("TST", "TST").send({
+        from:FROM_ACCOUNT, gas:3000000})
+        .on('confirmation', (confirmations, receipt) => {
+               console.log('CONFIRMATION');
+               console.log(confirmations);
+               console.log(receipt);
+        })*/
+    //console.log(out);
+    //const MonalizaFactory = await ethers.getContractFactory("MonalizaFactory")
+}
+//testhh()
 
 
 
@@ -147,6 +240,7 @@ var web3Provider = new HDWalletProvider({
     providerOrUrl: RINKEBY_RPC_URL,
     pollingInterval: 16000
   });
+  
 
     //mnemonic, "https://rpc-mumbai.matic.today")
 Monaliza.setProvider(web3Provider);
@@ -316,7 +410,240 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
     }
   })
 
-app.post('/deploynftcontract', (req, res, next) => {
+  app.post('/deploynftcontract', async (req, res, next) => {
+    try {
+        console.log("Starting to execute deploynft");
+        console.log(req.body);
+        var name = req.body.assetName;
+        var symbol = req.body.assetSymbol;
+        var fileName = req.body.fileName;
+        console.log(name + " " + symbol);
+        const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+        //console.log(MonalizaFactory);
+        const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+        var sendPromise = await monalizaFactory.deployNFTContract(name, symbol);
+        /*sendPromise.then(function(transaction){
+            console.log(transaction);
+        });*/
+        var eventCounter = 0;
+        monalizaFactory.on("DeployContract", (name, symbol, address) => {
+        //console.log(address);
+            if(name == req.body.assetName && symbol == req.body.assetSymbol && eventCounter == 0){
+                console.log("NFT contract address " + address);
+                eventCounter ++;
+                        //monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000})
+        //.then(function(value) {
+        //console.log(value);  
+        
+        //console.log("NFT contract address " + value.receipt.rawLogs[0].address);
+        //console.log(value.receipt.rawLogs[0].address);
+            //res.json({"contractAddress": value.receipt.rawLogs[0].address});
+            res.json({"contractAddress": address});
+
+                genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
+                .then(() => {
+                    console.log('done!');
+                    const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + req.body.fileName + '.png');
+                    pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
+                        const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
+                            const options = {
+                                pinataMetadata: {
+                                    name: "somename",
+                                    keyvalues: {
+                                        customKey: 'customValue',
+                                        customKey2: 'customValue2'
+                                    }
+                                },
+                                pinataOptions: {
+                                    cidVersion: 0
+                                }
+                            };
+
+                            pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                                //handle results here
+                                //console.log(result);
+                            //prepare metadata object
+                            var metadata= {
+                                "name": req.body.assetName,
+                                "description": req.body.description,
+                                "image": "ipfs://" + thumbNailResult.IpfsHash,
+                                "video": "ipfs://" + result.IpfsHash
+                            }
+                            //Create metadata URI
+                            //TODO
+                                const metadataOptions = {
+                                    pinataMetadata: {
+                                        name: "metadata",
+                                        keyvalues: {
+                                            customKey: 'customValue',
+                                            customKey2: 'customValue2'
+                                        }
+                                    },
+                                    pinataOptions: {
+                                        cidVersion: 0
+                                    }
+                                };
+                                pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                                    var allAssets =  db.get('assets').assetDetails;
+                                    allAssets.push({
+                                        "assetContractID": address,
+                                        "assetName": req.body.assetName,
+                                        "assetSymbol": req.body.assetSymbol,
+                                        "assetType": "ERC721",
+                                        "creatorAddress": req.body.creatorAddress,
+                                        "imageSrc": req.body.fileName,
+                                        "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                        "contentSrc": req.body.fileName,
+                                        "docURL": req.body.docURL || '',
+                                        "description": req.body.description  || ''
+                                    })  
+                                    db.set('assets', {"assetDetails": allAssets});  
+                                    db.sync();
+                                }).catch((err) => {
+                                    //handle error here
+                                    console.log(err);
+                                });
+                            
+                            }).catch((err) => {
+                                //handle error here
+                                console.log(err);
+                            });
+                        
+
+
+                    }).catch((err) => {
+                        //handle error here
+                        console.log(err);
+                    });
+                })
+                .catch(err => console.error(err))
+                }
+            
+
+            });  
+        } catch (error) {
+            console.log(error)
+            return next(error)
+        }   
+    //processNFTContractDeployment(req, res)
+    //}).catch(function(err) {
+    //    console.log(err);
+    //});
+    //return monalizaInstance.mint(req.query.contractaddress, req.query.toaddress, req.query.tokenuri, {from: process.env.FROM_ACCOUNT, gas: 4600000});
+    })
+
+    async function processNFTContractDeployment(req, res){
+            //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
+            var name = req.body.assetName;
+            var symbol = req.body.assetSymbol;
+            var fileName = req.body.fileName;
+            console.log(name + " " + symbol);
+            const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+            //console.log(MonalizaFactory);
+            const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+            var sendPromise = monalizaFactory.deployNFTContract(name, symbol);
+            sendPromise.then(function(transaction){
+                console.log(transaction);
+            });
+            
+            monalizaFactory.on("DeployContract", (address) => {
+                //console.log(address);
+            
+            //monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000})
+            //.then(function(value) {
+            //console.log(value);  
+            console.log("NFT contract address " + address);
+            //console.log("NFT contract address " + value.receipt.rawLogs[0].address);
+            //console.log(value.receipt.rawLogs[0].address);
+                //res.json({"contractAddress": value.receipt.rawLogs[0].address});
+                if (res.headersSent) {
+                    return next(err)
+                  }else {
+                    res.json({"contractAddress": address});
+                  }
+                
+
+                genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
+                .then(() => {
+                    console.log('done!');
+                    const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + req.body.fileName + '.png');
+                    pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
+                        const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
+                            const options = {
+                                pinataMetadata: {
+                                    name: "somename",
+                                    keyvalues: {
+                                        customKey: 'customValue',
+                                        customKey2: 'customValue2'
+                                    }
+                                },
+                                pinataOptions: {
+                                    cidVersion: 0
+                                }
+                            };
+
+                            pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                                //handle results here
+                                //console.log(result);
+                            //prepare metadata object
+                            var metadata= {
+                                "name": req.body.assetName,
+                                "description": req.body.description,
+                                "image": "ipfs://" + thumbNailResult.IpfsHash,
+                                "video": "ipfs://" + result.IpfsHash
+                            }
+                            //Create metadata URI
+                            //TODO
+                                const metadataOptions = {
+                                    pinataMetadata: {
+                                        name: "metadata",
+                                        keyvalues: {
+                                            customKey: 'customValue',
+                                            customKey2: 'customValue2'
+                                        }
+                                    },
+                                    pinataOptions: {
+                                        cidVersion: 0
+                                    }
+                                };
+                                pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                                    var allAssets =  db.get('assets').assetDetails;
+                                    allAssets.push({
+                                        "assetContractID": address,
+                                        "assetName": req.body.assetName,
+                                        "assetSymbol": req.body.assetSymbol,
+                                        "assetType": "ERC721",
+                                        "creatorAddress": req.body.creatorAddress,
+                                        "imageSrc": req.body.fileName,
+                                        "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                        "contentSrc": req.body.fileName,
+                                        "docURL": req.body.docURL || '',
+                                        "description": req.body.description  || ''
+                                    })  
+                                    db.set('assets', {"assetDetails": allAssets});  
+                                    db.sync();
+                                }).catch((err) => {
+                                    //handle error here
+                                    console.log(err);
+                                });
+                            
+                            }).catch((err) => {
+                                //handle error here
+                                console.log(err);
+                            });
+                        
+
+
+                    }).catch((err) => {
+                        //handle error here
+                        console.log(err);
+                    });
+                })
+                .catch(err => console.error(err))
+                });  
+    }
+
+app.post('/deploynftcontract2', (req, res, next) => {
     console.log("Starting to execute deploynft");
     console.log(req.body);
     //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
@@ -324,75 +651,90 @@ app.post('/deploynftcontract', (req, res, next) => {
     var symbol = req.body.assetSymbol;
     var fileName = req.body.fileName;
     console.log(name + " " + symbol);
-    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 3000000})
+    monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000})
   .then(function(value) {
     console.log(value);  
     console.log("NFT contract address " + value.receipt.rawLogs[0].address);
     console.log(value.receipt.rawLogs[0].address);
         res.json({"contractAddress": value.receipt.rawLogs[0].address});
 
-        const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
-        const options = {
-            pinataMetadata: {
-                name: "somename",
-                keyvalues: {
-                    customKey: 'customValue',
-                    customKey2: 'customValue2'
-                }
-            },
-            pinataOptions: {
-                cidVersion: 0
-            }
-        };
-        pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
-            //handle results here
-            //console.log(result);
-           //prepare metadata object
-           var metadata= {
-            "name": req.body.assetName,
-            "description": req.body.description,
-            "image": "ipfs://" + result.IpfsHash
-        }
-        //Create metadata URI
-        //TODO
-            const metadataOptions = {
-                pinataMetadata: {
-                    name: "metadata",
-                    keyvalues: {
-                        customKey: 'customValue',
-                        customKey2: 'customValue2'
+        genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
+        .then(() => {
+            console.log('done!');
+            const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + req.body.fileName + '.png');
+            pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
+                const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
+                    const options = {
+                        pinataMetadata: {
+                            name: "somename",
+                            keyvalues: {
+                                customKey: 'customValue',
+                                customKey2: 'customValue2'
+                            }
+                        },
+                        pinataOptions: {
+                            cidVersion: 0
+                        }
+                    };
+
+                    pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                        //handle results here
+                        //console.log(result);
+                       //prepare metadata object
+                       var metadata= {
+                        "name": req.body.assetName,
+                        "description": req.body.description,
+                        "image": "ipfs://" + thumbNailResult.IpfsHash,
+                        "video": "ipfs://" + result.IpfsHash
                     }
-                },
-                pinataOptions: {
-                    cidVersion: 0
-                }
-            };
-            pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
-                var allAssets =  db.get('assets').assetDetails;
-                allAssets.push({
-                    "assetContractID": value.receipt.rawLogs[0].address,
-                    "assetName": req.body.assetName,
-                    "assetSymbol": req.body.assetSymbol,
-                    "assetType": "ERC721",
-                    "creatorAddress": req.body.creatorAddress,
-                    "imageSrc": req.body.fileName,
-                    "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
-                    "contentSrc": req.body.fileName,
-                    "docURL": req.body.docURL || '',
-                    "description": req.body.description  || ''
-                })  
-                db.set('assets', {"assetDetails": allAssets});  
-                db.sync();
+                    //Create metadata URI
+                    //TODO
+                        const metadataOptions = {
+                            pinataMetadata: {
+                                name: "metadata",
+                                keyvalues: {
+                                    customKey: 'customValue',
+                                    customKey2: 'customValue2'
+                                }
+                            },
+                            pinataOptions: {
+                                cidVersion: 0
+                            }
+                        };
+                        pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                            var allAssets =  db.get('assets').assetDetails;
+                            allAssets.push({
+                                "assetContractID": value.receipt.rawLogs[0].address,
+                                "assetName": req.body.assetName,
+                                "assetSymbol": req.body.assetSymbol,
+                                "assetType": "ERC721",
+                                "creatorAddress": req.body.creatorAddress,
+                                "imageSrc": req.body.fileName,
+                                "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                "contentSrc": req.body.fileName,
+                                "docURL": req.body.docURL || '',
+                                "description": req.body.description  || ''
+                            })  
+                            db.set('assets', {"assetDetails": allAssets});  
+                            db.sync();
+                        }).catch((err) => {
+                            //handle error here
+                            console.log(err);
+                        });
+                    
+                    }).catch((err) => {
+                        //handle error here
+                        console.log(err);
+                    });
+                
+
+
             }).catch((err) => {
                 //handle error here
                 console.log(err);
             });
-        
-        }).catch((err) => {
-            //handle error here
-            console.log(err);
-        });
-    
+        })
+        .catch(err => console.error(err))
 
     }).catch(function(err) {
         console.log(err);
@@ -401,11 +743,50 @@ app.post('/deploynftcontract', (req, res, next) => {
 })
 
 
-app.post('/claimairdrop', (req, res) => {
+app.post('/claimairdrop', async (req, res) => {
     console.log("NFT minting started");
     console.log(req.body);
-
-    monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4600000}).then
+    const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+    //console.log(MonalizaFactory);
+    const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+    var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL);
+    var eventCounter = 0;
+    monalizaFactory.on("Mint", (address, tokenID) => {
+    //console.log(address);
+        if(address == req.body.assetContractAddress && eventCounter == 0){
+            console.log("NFT token ID " + tokenID);
+            eventCounter ++;
+            //console.log("NFT minted transaction id is " + tokenID);
+            //add to airdropped list and prevent duplicate claim
+            //console.log(result);
+            //console.log("tokenID is " + tokenID);
+            res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
+            var allAirdropsClaimed;
+            var allAirdropsClaimedDetails;
+            try{
+                allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+                //console.log(airdropDetails);
+            }catch(e){
+        
+            }
+            
+                if(allAirdropsClaimedDetails != undefined){
+                    allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+                }else{
+                    allAirdropsClaimed = new Array();
+                }
+                allAirdropsClaimed.push({
+                    "assetContractAddress": req.body.assetContractAddress,
+                    "airdropAddress": req.body.userAddress,
+                    "tokenID": tokenID
+                })  
+                db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
+                //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
+                db.sync();
+       
+        }
+    })
+    /*monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000}).then
     (function(result){
         console.log("NFT minted transaction id is " + result.tx);
         //add to airdropped list and prevent duplicate claim
@@ -437,7 +818,7 @@ app.post('/claimairdrop', (req, res) => {
    
     }).catch(function(err) {
        console.log(err);
-    });
+    });*/
 
 
 

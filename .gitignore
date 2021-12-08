@@ -5,3 +5,4 @@ create-game-asset.html
 database.json
 *.pem
 secret-rinkeby.json
+.env

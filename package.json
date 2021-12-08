@@ -18,11 +18,12 @@
   },
   "homepage": "https://github.com/monalizatokens/monaliza#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^3.4.1",
+    "@alch/alchemy-web3": "^1.1.9",
+    "@openzeppelin/contracts": "^4.4.0",
     "@pinata/sdk": "^1.1.23",
     "@truffle/abi-utils": "^0.2.3",
     "@truffle/contract": "^4.3.29",
-    "@truffle/hdwallet-provider": "^1.4.0",
+    "@truffle/hdwallet-provider": "^1.7.0",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
@@ -30,6 +31,7 @@
     "dotenv": "^8.6.0",
     "ethereumjs-util": "^7.1.1",
     "express": "^4.17.1",
+    "ffmpeg-static": "^4.4.0",
     "install": "^0.13.0",
     "morgan": "^1.10.0",
     "multer": "^1.4.3",
@@ -37,8 +39,14 @@
     "openzeppelin-solidity": "^3.4.0",
     "request": "^2.88.2",
     "simple-json-db": "^1.2.3",
+    "simple-thumbnail": "^1.6.5",
     "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.3.4",
+    "web3": "^1.6.1",
     "web3-hdwallet-provider": "^1.0.4-fix2"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.3",
+    "ethers": "^5.5.2",
+    "hardhat": "^2.7.0"
   }
 }
