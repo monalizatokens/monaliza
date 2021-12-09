@@ -35,11 +35,18 @@ const { ethers } = require("hardhat");
 
 var allAssets = [];
 
-const options = {
+/*const options = {
     key: fs.readFileSync('key.pem'),
     cert: fs.readFileSync('cert.pem')
+  };*/
+  const options = {
+    key: fs.readFileSync('./certs/monaliza.key'),
+    cert: fs.readFileSync('./certs/STAR_monaliza_app.crt'),
+    ca: [
+          fs.readFileSync('./certs/SectigoRSADomainValidationSecureServerCA.crt'),
+          fs.readFileSync('./certs/USERTrustRSAAAACA.crt')
+       ]
   };
-
 
 
 /*console.log(db.get('assets'));*/
@@ -355,21 +362,26 @@ app.get('/getairdropsforuser', (req, res, next) => {
             for(var j=0; j <allAirdrops[i].airdropAddresses.length; j++){
                 console.log(userAddress);
                 console.log(allAirdrops[i].airdropAddresses[j]);
-                if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
-                    var claimDetails = {}
-                    claimDetails.claimed = false;
-                    claimDetails = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
-                    userRelevantAssets.push({
-                        "creatorAddress": allAirdrops[i].creatorAddress,
-                        "assetContractAddress": allAirdrops[i].assetContractAddress,
-                        "creationDate": allAirdrops[i].creationDate,
-                        "assetName": allAirdrops[i].assetName,
-                        "ipfsURL": allAirdrops[i].ipfsURL,
-                        "description": allAirdrops[i].description,
-                        "fileName": allAirdrops[i].fileName,
-                        "claimed": claimDetails.claimed,
-                        "tokenID": claimDetails.tokenID
-                    })
+                try{
+                    if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
+                        var claimDetails = {}
+                        claimDetails.claimed = false;
+                        claimDetails = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
+                        userRelevantAssets.push({
+                            "creatorAddress": allAirdrops[i].creatorAddress,
+                            "assetContractAddress": allAirdrops[i].assetContractAddress,
+                            "creationDate": allAirdrops[i].creationDate,
+                            "assetName": allAirdrops[i].assetName,
+                            "ipfsURL": allAirdrops[i].ipfsURL,
+                            "description": allAirdrops[i].description,
+                            "fileName": allAirdrops[i].fileName,
+                            "claimed": claimDetails.claimed,
+                            "tokenID": claimDetails.tokenID
+                        })
+                    }
+                }catch(e){
+                    console.log("Got Error in address comparison");
+                    console.log(e);
                 }
             }
         }
@@ -778,7 +790,7 @@ app.post('/claimairdrop', async (req, res) => {
                 allAirdropsClaimed.push({
                     "assetContractAddress": req.body.assetContractAddress,
                     "airdropAddress": req.body.userAddress,
-                    "tokenID": tokenID
+                    "tokenID": tokenID.toString()
                 })  
                 db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
                 //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);

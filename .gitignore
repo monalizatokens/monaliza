@@ -6,3 +6,4 @@ database.json
 *.pem
 secret-rinkeby.json
 .env
+certs

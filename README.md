@@ -9,7 +9,7 @@ https://ethereum.org/hr/developers/tutorials/how-to-mint-an-nft/
 npx hardhat compile  
 npx hardhat run scripts/deploy.js --network matic  
 
-
+On linux, run "apt  install ffmpeg" for ffmpeg
 
   
 old
