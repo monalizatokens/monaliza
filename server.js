@@ -31,7 +31,29 @@ console.log(API_URL)
 const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
 const alchemyWeb3 = createAlchemyWeb3(API_URL)
 const { ethers } = require("hardhat");
+const { MongoClient } = require('mongodb');
+
 //const ethers = require("@nomiclabs/hardhat-ethers");
+const url = 'mongodb://' + require("./secret.json").mongo_db_user + ":" + require("./secret.json").mongo_db_pwd + "@" +  require("./secret.json").mongo_db_ip +':27017';
+const client = new MongoClient(url);
+const dbName = 'monaliza';
+
+/*async function main() {
+    // Use connect method to connect to the server
+    await client.connect();
+    console.log('Connected successfully to server');
+    const db = client.db(dbName);
+    const collection = db.collection('all');
+  
+    // the following code examples can be pasted here...
+  
+    return 'done.';
+  }
+  
+  main()
+    .then(console.log)
+    .catch(console.error)
+    .finally(() => client.close());*/
 
 var allAssets = [];
 
@@ -282,8 +304,12 @@ function createAirDrops(req){
             }
             console.log("Printing airdrop addresses in file mode");
             console.log(airdropAddresses);
+            saveAirdropInMongo(airdropAddresses, req)
+            .then(console.log)
+            .catch(console.error)
+            .finally(() => client.close());
 
-            var allAirdrops;
+            /*var allAirdrops;
             var airdropDetails;
             try{
                 airdropDetails = db.get('airdrops').airdropDetails;
@@ -309,14 +335,16 @@ function createAirDrops(req){
                 "fileName": req.body.fileName
             })  
             db.set('airdrops', {"airdropDetails": allAirdrops});  
-            db.sync();
+            db.sync();*/
             // [
             //   { NAME: 'Daffy Duck', AGE: '24' },
             //   { NAME: 'Bugs Bunny', AGE: '22' }
             // ]
         });
     }else{
-        airdropAddresses = req.body.airdropAddresses;
+        saveAirdropInMongo(req.body.airdropAddresses, req)
+
+        /*airdropAddresses = req.body.airdropAddresses;
         console.log("Printing airdrop addresses in mnaual entry mode");
         console.log(airdropAddresses);
         var allAirdrops;
@@ -345,53 +373,97 @@ function createAirDrops(req){
             "fileName": req.body.fileName
         })  
         db.set('airdrops', {"airdropDetails": allAirdrops});  
-        db.sync();
+        db.sync();*/
     }
 }
 
+async function saveAirdropInMongo(airdropAddresses, req){
+    try{
+        await client.connect();
+        console.log('Connected successfully to mongo server');
+        const db = client.db(dbName);
+        const collection = db.collection('airdrop');
+        
+        // the following code examples can be pasted here...
+        const insertResult = await collection.insertOne({
+            "creatorAddress": req.body.creatorAddress,
+            "assetContractAddress": req.body.assetContractAddress,
+            "airdropAddresses": airdropAddresses,
+            "creationDate": req.body.creationDate,
+            "assetName": req.body.assetName,
+            "description": req.body.description,
+            "ipfsURL": req.body.ipfsURL,
+            "docURL": req.body.docURL,
+            "fileName": req.body.fileName
+        });
+        console.log('Inserted documents =>', insertResult);
+    }catch(e){
 
-app.get('/getairdropsforuser', (req, res, next) => {
+    }finally{
+        client.close();
+    }
+
+   return 'done.';
+}
+
+app.get('/getairdropsforuser', async (req, res, next) => {
     console.log("In getairdropsforuser");
     console.log(req.query.useraddress);
     var userAddress = req.query.useraddress;
-    var allAirdrops =  db.get('airdrops').airdropDetails;
-    console.log(allAirdrops);
     var userRelevantAssets = []
-    for(var i=0; i <allAirdrops.length; i++){
-        if(allAirdrops[i].airdropAddresses){
-            for(var j=0; j <allAirdrops[i].airdropAddresses.length; j++){
-                console.log(userAddress);
-                console.log(allAirdrops[i].airdropAddresses[j]);
-                try{
-                    if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
-                        var claimDetails = {}
-                        claimDetails.claimed = false;
-                        claimDetails = checkAirdropClaimed(allAirdrops[i].assetContractAddress, userAddress);
-                        userRelevantAssets.push({
-                            "creatorAddress": allAirdrops[i].creatorAddress,
-                            "assetContractAddress": allAirdrops[i].assetContractAddress,
-                            "creationDate": allAirdrops[i].creationDate,
-                            "assetName": allAirdrops[i].assetName,
-                            "ipfsURL": allAirdrops[i].ipfsURL,
-                            "description": allAirdrops[i].description,
-                            "fileName": allAirdrops[i].fileName,
-                            "claimed": claimDetails.claimed,
-                            "tokenID": claimDetails.tokenID
-                        })
+    try{
+        /*var allAirdrops =  db.get('airdrops').airdropDetails;
+        console.log(allAirdrops);*/
+        await client.connect();
+        console.log('Connected successfully to server');
+        const db = client.db(dbName);
+        const allAirdrops = await db.collection('airdrop').find({}).toArray();
+        const allAirdropsClaimed = await db.collection('airdropClaimed').find({}).toArray();
+      
+        // the following code examples can be pasted here...
+      
+        for(var i=0; i <allAirdrops.length; i++){
+            if(allAirdrops[i].airdropAddresses){
+                for(var j=0; j <allAirdrops[i].airdropAddresses.length; j++){
+                    console.log(userAddress);
+                    console.log(allAirdrops[i].airdropAddresses[j]);
+                    try{
+                        if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
+                            var claimDetails = {}
+                            claimDetails.claimed = false;
+                            claimDetails = checkAirdropClaimed(allAirdropsClaimed, allAirdrops[i].assetContractAddress, userAddress);
+                            userRelevantAssets.push({
+                                "creatorAddress": allAirdrops[i].creatorAddress,
+                                "assetContractAddress": allAirdrops[i].assetContractAddress,
+                                "creationDate": allAirdrops[i].creationDate,
+                                "assetName": allAirdrops[i].assetName,
+                                "ipfsURL": allAirdrops[i].ipfsURL,
+                                "description": allAirdrops[i].description,
+                                "fileName": allAirdrops[i].fileName,
+                                "claimed": claimDetails.claimed,
+                                "tokenID": claimDetails.tokenID
+                            })
+                        }
+                    }catch(e){
+                        console.log("Got Error in address comparison");
+                        console.log(e);
                     }
-                }catch(e){
-                    console.log("Got Error in address comparison");
-                    console.log(e);
                 }
             }
         }
+    }catch(e){
+        console.log(e);
+    }finally{
+        client.close();
     }
 
-    function checkAirdropClaimed(assetContractAddress, userAddress){
+
+
+    function checkAirdropClaimed(allAirdropsClaimed, assetContractAddress, userAddress){
         var claimDetails = {}
         claimDetails.claimed = false;
         var allAirdropsClaimed;
-        var allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+        var allAirdropsClaimedDetails = allAirdropsClaimed;
         console.log(allAirdropsClaimedDetails);
         for(var i=0; i <allAirdropsClaimedDetails.length; i++){
             if((allAirdropsClaimedDetails[i].airdropAddress.toUpperCase() == userAddress.toUpperCase()) && (allAirdropsClaimedDetails[i].assetContractAddress.toUpperCase() == assetContractAddress.toUpperCase())){
@@ -450,8 +522,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
         //console.log("NFT contract address " + value.receipt.rawLogs[0].address);
         //console.log(value.receipt.rawLogs[0].address);
             //res.json({"contractAddress": value.receipt.rawLogs[0].address});
-            res.json({"contractAddress": address});
-
+            
                 genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
                 .then(() => {
                     console.log('done!');
@@ -472,6 +543,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                             };
 
                             pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                                console.log("In pinFileToIPFS");
                                 //handle results here
                                 //console.log(result);
                             //prepare metadata object
@@ -496,8 +568,15 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                     }
                                 };
                                 pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
-                                    var allAssets =  db.get('assets').assetDetails;
-                                    allAssets.push({
+                                    console.log("In pinJSONToIPFS");
+                                    saveAssetInMongo(address, req, metadataResult, res)
+                                    .then(console.log)
+                                    .catch(console.error)
+                                    .finally(() => client.close());
+                                    //return 'done.';
+
+                                    //var allAssets =  db.get('assets').assetDetails;
+                                    /*allAssets.push({
                                         "assetContractID": address,
                                         "assetName": req.body.assetName,
                                         "assetSymbol": req.body.assetSymbol,
@@ -510,10 +589,11 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                         "description": req.body.description  || ''
                                     })  
                                     db.set('assets', {"assetDetails": allAssets});  
-                                    db.sync();
+                                    db.sync();*/
                                 }).catch((err) => {
                                     //handle error here
                                     console.log(err);
+                                    //client.close();
                                 });
                             
                             }).catch((err) => {
@@ -544,6 +624,31 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
     //return monalizaInstance.mint(req.query.contractaddress, req.query.toaddress, req.query.tokenuri, {from: process.env.FROM_ACCOUNT, gas: 4600000});
     })
 
+    async function saveAssetInMongo(address, req, metadataResult, res){
+        console.log("In saveAssetInMongo " + req.body.assetName + " " + req.body.assetSymbol + " " + req.body.description)
+        await client.connect();
+        console.log('Connected successfully to mongo server');
+        const db = client.db(dbName);
+        const collection = db.collection('assets');
+        
+        // the following code examples can be pasted here...
+        const insertResult = await collection.insertOne({
+            "assetContractID": address,
+            "assetName": req.body.assetName,
+            "assetSymbol": req.body.assetSymbol,
+            "assetType": "ERC721",
+            "creatorAddress": req.body.creatorAddress,
+            "imageSrc": req.body.fileName,
+            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+            "contentSrc": req.body.fileName,
+            "docURL": req.body.docURL || '',
+            "description": req.body.description  || ''
+        });
+        console.log('Inserted documents =>', insertResult);
+        res.json({"contractAddress": address});
+        return 'done.';
+    }
+
     async function processNFTContractDeployment(req, res){
             //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
             var name = req.body.assetName;
@@ -553,6 +658,8 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
             const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
             //console.log(MonalizaFactory);
             const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+            var newNonce = await ethers.provider.getTransactionCount(req.body.creatorAddress) + 1;
+            var options = {nonce: newNonce}
             var sendPromise = monalizaFactory.deployNFTContract(name, symbol);
             sendPromise.then(function(transaction){
                 console.log(transaction);
@@ -758,10 +865,16 @@ app.post('/deploynftcontract2', (req, res, next) => {
 app.post('/claimairdrop', async (req, res) => {
     console.log("NFT minting started");
     console.log(req.body);
+    console.log(await ethers.provider.getTransactionCount(req.body.userAddress));
+    var newNonce = await ethers.provider.getTransactionCount(req.body.userAddress) + 1;
     const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
     //console.log(MonalizaFactory);
     const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+    //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
+    var options = { nonce: newNonce};
+
     var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL);
+    console.log(sendPromise);
     var eventCounter = 0;
     monalizaFactory.on("Mint", (address, tokenID) => {
     //console.log(address);
@@ -773,16 +886,20 @@ app.post('/claimairdrop', async (req, res) => {
             //console.log(result);
             //console.log("tokenID is " + tokenID);
             res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
-            var allAirdropsClaimed;
+            /*var allAirdropsClaimed;
             var allAirdropsClaimedDetails;
             try{
                 allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
                 //console.log(airdropDetails);
             }catch(e){
         
-            }
-            
-                if(allAirdropsClaimedDetails != undefined){
+            }*/
+            saveAirdropClaimedInMongo(req, tokenID.toString())
+            .then(console.log)
+            .catch(console.error)
+            .finally(() => client.close());
+
+                /*if(allAirdropsClaimedDetails != undefined){
                     allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
                 }else{
                     allAirdropsClaimed = new Array();
@@ -794,10 +911,35 @@ app.post('/claimairdrop', async (req, res) => {
                 })  
                 db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
                 //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
-                db.sync();
+                db.sync();*/
        
         }
     })
+
+    async function saveAirdropClaimedInMongo(req, tokenIDValue){
+        try{
+            await client.connect();
+            console.log('Connected successfully to mongo server');
+            const db = client.db(dbName);
+            const collection = db.collection('airdropClaimed');
+            
+            // the following code examples can be pasted here...
+            const insertResult = await collection.insertOne({
+                "assetContractAddress": req.body.assetContractAddress,
+                "airdropAddress": req.body.userAddress,
+                "tokenID": tokenIDValue
+            });
+            console.log('Inserted documents =>', insertResult);
+        }catch(e){
+            console.log(e);
+        }finally{
+            client.close();
+        }
+    
+       return 'done.';
+    }
+    
+    
     /*monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000}).then
     (function(result){
         console.log("NFT minted transaction id is " + result.tx);
@@ -981,16 +1123,21 @@ app.get('/getmemetokenbalance', (req, res) => {
 });
 })
 
-app.get('/assetsforuseraddress', function (req, res) {
+app.get('/assetsforuseraddress', async function (req, res) {
     var userAddress = req.query.useraddress;
     console.log(userAddress);
-    var allAssets = db.get('assets');
+    await client.connect();
+    console.log('Connected successfully to server');
+    const db = await client.db(dbName);
+    const allAssets = await db.collection('assets').find({}).toArray();
+
+    //var allAssets = db.get('assets');
     console.log(allAssets);
     var userCreatedAssets = [];
-    for(var i=0; i < allAssets.assetDetails.length; i++){
-        console.log(allAssets.assetDetails[i].creatorAddress);
-        if(userAddress == allAssets.assetDetails[i].creatorAddress){
-            userCreatedAssets.push(allAssets.assetDetails[i]);
+    for(var i=0; i < allAssets.length; i++){
+        console.log(allAssets[i].creatorAddress);
+        if(userAddress == allAssets[i].creatorAddress){
+            userCreatedAssets.push(allAssets[i]);
         }
     }
     console.log(userCreatedAssets);

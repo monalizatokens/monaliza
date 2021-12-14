@@ -539,8 +539,13 @@ $( document ).ready(function() {
         accountHere = account;
         console.log(account);
         //alert(account);
-        getAssets(account);
-        loadClaimableAirdrops(account);
+        //getAssets(account);
+        //loadClaimableAirdrops(account);
+        if( window.location.pathname.includes("claim.html")){
+            loadClaimableAirdrops(account);
+        }else if(window.location.pathname.includes("airdrop.html")){
+            getAssets(account);
+        }
     }
 
     function getAssets(account){

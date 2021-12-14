@@ -11,6 +11,8 @@ npx hardhat run scripts/deploy.js --network matic
 
 On linux, run "apt  install ffmpeg" for ffmpeg
 
+Domain SSL installation steps are here   
+https://support.comodo.com/index.php?/Knowledgebase/Article/View/1141/37/certificate-installation--nodejs-in-linux   
   
 old
 1. Run command "truffle migrate --network rinkeby"
