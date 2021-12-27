@@ -3,6 +3,7 @@ async function main() {
   
     // Start deployment, returning a promise that resolves to a contract object
     const monalizaFactory = await MonalizaFactory.deploy()
+    console.log("Contract deployment tx hash:", monalizaFactory.deployTransaction.hash)
     console.log("Contract deployed to address:", monalizaFactory.address)
   }
   

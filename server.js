@@ -132,7 +132,7 @@ var cors = require('cors')
 
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 
-var monalizaFactoryContractAddress = "0x2de01bad0EC51F9f02d298aCc8c2105F5c1cc43D";
+var monalizaFactoryContractAddress = "0x180f26defae5aad05544ca0562b47985a491cbff";
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
 
 async function testhh(){
@@ -262,24 +262,24 @@ var Monaliza = TruffleContract(MonalizaArtifact);
 var MonalizaNFT = TruffleContract(MonalizaNFTArtifact);
 //var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
 
-var web3Provider = new HDWalletProvider({
+/*var web3Provider = new HDWalletProvider({
     mnemonic: {
       phrase: mnemonic
     },
     providerOrUrl: RINKEBY_RPC_URL,
     pollingInterval: 16000
-  });
+  });*/
   
 
     //mnemonic, "https://rpc-mumbai.matic.today")
-Monaliza.setProvider(web3Provider);
+/*Monaliza.setProvider(web3Provider);
 var monalizaInstance = new Object();
 var n = 1;
 var imgPath = './dunst.jpg';
 
 Monaliza.deployed().then(function(instance) {
     monalizaInstance = instance;
-})
+})*/
 
 app.post('/createairdrop', (req, res, next) => {
     console.log("Starting to createairdrop");
@@ -505,7 +505,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
         const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
         //console.log(MonalizaFactory);
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
-        var sendPromise = await monalizaFactory.deployNFTContract(name, symbol);
+        var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress);
         /*sendPromise.then(function(transaction){
             console.log(transaction);
         });*/
@@ -551,7 +551,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                 "name": req.body.assetName,
                                 "description": req.body.description,
                                 "image": "ipfs://" + thumbNailResult.IpfsHash,
-                                "video": "ipfs://" + result.IpfsHash
+                                "youtube_url": "https://ipfs.io/ipfs/" + result.IpfsHash
                             }
                             //Create metadata URI
                             //TODO
@@ -639,7 +639,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
             "assetType": "ERC721",
             "creatorAddress": req.body.creatorAddress,
             "imageSrc": req.body.fileName,
-            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash + "?filename=metadata.json",
             "contentSrc": req.body.fileName,
             "docURL": req.body.docURL || '',
             "description": req.body.description  || ''
@@ -709,7 +709,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                 "name": req.body.assetName,
                                 "description": req.body.description,
                                 "image": "ipfs://" + thumbNailResult.IpfsHash,
-                                "video": "ipfs://" + result.IpfsHash
+                                "youtube_url": "https://ipfs.io/ipfs/" + result.IpfsHash
                             }
                             //Create metadata URI
                             //TODO
@@ -734,7 +734,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                         "assetType": "ERC721",
                                         "creatorAddress": req.body.creatorAddress,
                                         "imageSrc": req.body.fileName,
-                                        "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                        "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash + "?filename=metadata.json",
                                         "contentSrc": req.body.fileName,
                                         "docURL": req.body.docURL || '',
                                         "description": req.body.description  || ''
@@ -829,7 +829,7 @@ app.post('/deploynftcontract2', (req, res, next) => {
                                 "assetType": "ERC721",
                                 "creatorAddress": req.body.creatorAddress,
                                 "imageSrc": req.body.fileName,
-                                "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash + "?filename=metadata.json",
                                 "contentSrc": req.body.fileName,
                                 "docURL": req.body.docURL || '',
                                 "description": req.body.description  || ''
