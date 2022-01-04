@@ -1,7 +1,10 @@
 # monaliza
 
 To run:  
-node server.js
+npm install pm2@latest -g
+pm2 start server.js 
+details here https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04  
+
   
 
 To deploy solidity contract:
