@@ -19,6 +19,7 @@
   "homepage": "https://github.com/monalizatokens/monaliza#readme",
   "dependencies": {
     "@alch/alchemy-web3": "^1.1.9",
+    "@metamask/eth-sig-util": "^4.0.0",
     "@openzeppelin/contracts": "^4.4.0",
     "@pinata/sdk": "^1.1.23",
     "@truffle/abi-utils": "^0.2.3",

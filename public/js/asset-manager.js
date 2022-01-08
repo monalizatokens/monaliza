@@ -476,50 +476,79 @@ $( document ).ready(function() {
     $(".col-sm-12").on("click", ".claim-airdrop-btn", function(){
         console.log("claim-airdrop-btn clicked");
         console.log($( this ).hasClass("disabled"));
-        var assetContractAddress = $( this ).attr("assetcontractaddress");
-        if(! ($( this ).hasClass("disabled"))){
-            console.log($( this ).attr("assetcontractaddress"));
-            if($(".connect-wallet-btn").html() == "Connect Wallet"){
-                validationStatus = false;
-                $.showNotification({
-                    body:"<h3>Connect Metamask wallet.</h3>"
-                })
-                return;
-            }else{
-                console.log("came in else");
-                $(this).prop('disabled', true);
-                var claimData = {
-                    "userAddress": accountHere,
-                    "assetContractAddress":$( this ).attr("assetcontractaddress"),
-                    "ipfsURL": $( this ).attr("ipfsurl")
-                }
-                $("#myProgress").show();
-                $(window).scrollTop(0);
-                startProgressBar();
-                $.ajax( {
-                    url: '/claimairdrop',
-                    type: 'POST',
-                    data: JSON.stringify(claimData),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function(result){
-                        console.log(result);
-                        if(result){
-                            $("#myProgress").hide();
+        if($( this ).hasClass("disabled")) return;
+        //ASK USER TO SIGN A MESSAGE
+        //async function signMessage(){
+            var assetContractAddress = $( this ).attr("assetcontractaddress");
+            var ipfsURL = $( this ).attr("ipfsurl");
+            const web3Instance = new Web3(provider);
+            var buttonThis = this;
+            msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("claimairdrop"), {encoding: "hex"})
+            //if (!accountHere) return connect()
+            var sign = "";
+            web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
+                if (err) return console.error(err)
+                console.log('SIGNED:' + result)
+                sign = result;
+
+                    //Claim airdrop after signing
+                    
+                    if($( this ).hasClass("disabled") != true){
+                        //console.log($( this ).attr("assetcontractaddress"));
+                        if($(".connect-wallet-btn").html() == "Connect Wallet"){
+                            validationStatus = false;
                             $.showNotification({
-                                duration: 12000,
-                                body:"<h3>Airdrop claimed successfully. Add asset to Metamask with contract address " + claimData.assetContractAddress  + "</h3>"
-                        })
-                        $("." + assetContractAddress).find(".nft-token-id").html('<small>NFT Token ID: '    + result.tokenID +  '</small>');
-                        }else {
-                            $.showNotification({
-                                body:"<h3>Airdrop couldn't be claimed. Please try again.</h3>"
+                                body:"<h3>Connect Metamask wallet.</h3>"
                             })
+                            return;
+                        }else{
+                            console.log("came in else");
+                            $(buttonThis).prop('disabled', true);
+                            var claimData = {
+                                "userAddress": accountHere,
+                                "assetContractAddress": assetContractAddress,
+                                "ipfsURL": ipfsURL,
+                                "msgHash": msgHash,
+                                "sign": sign
+                            }
+                            $("#myProgress").show();
+                            $(window).scrollTop(0);
+                            startProgressBar();
+                            $.ajax( {
+                                url: '/claimairdrop',
+                                type: 'POST',
+                                data: JSON.stringify(claimData),
+                                contentType: "application/json; charset=utf-8",
+                                dataType: "json",
+                                success: function(result){
+                                    console.log(result);
+                                    if(result.assetContractID && result.tokenID){
+                                        $("#myProgress").hide();
+                                        $.showNotification({
+                                            duration: 12000,
+                                            body:"<h3>Airdrop claimed successfully. Add asset to Metamask with contract address " + claimData.assetContractAddress  + "</h3>"
+                                    })
+                                    $("." + assetContractAddress).find(".nft-token-id").html('<small>NFT Token ID: '    + result.tokenID +  '</small>');
+                                    }else {
+                                        $.showNotification({
+                                            body:"<h3>Airdrop couldn't be claimed. Please try again.</h3>"
+                                        })
+                                        $("#myProgress").hide();
+                                    }
+                                }
+                            } );
                         }
                     }
-                } );
-            }
-        }
+
+              })
+
+
+        //}
+
+        //signMessage();    
+
+
+
     })
 
 

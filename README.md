@@ -1,9 +1,11 @@
 # monaliza
 
 To run:  
-npm install pm2@latest -g
+npm install -g pm2
+pm2 link hawzioi6e7ht83h ki00axsbd0ew7em
 pm2 start server.js 
-details here https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04  
+Monitor at https://app.pm2.io/bucket/61d4868f06892910a79d73a4/backend/overview/servers
+Details here https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04  
 
   
 

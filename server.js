@@ -22,6 +22,7 @@ const db = new JSONdb('database.json', {});
 const ffmpeg = require('ffmpeg-static');
 console.log(ffmpeg);
 const genThumbnail = require('simple-thumbnail');
+const ethSigUtil = require("@metamask/eth-sig-util");
 
 require("dotenv").config()
 const API_URL = process.env.API_URL
@@ -260,7 +261,7 @@ console.log(FROM_ACCOUNT);
 
 var Monaliza = TruffleContract(MonalizaArtifact);
 var MonalizaNFT = TruffleContract(MonalizaNFTArtifact);
-//var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
+var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
 
 /*var web3Provider = new HDWalletProvider({
     mnemonic: {
@@ -863,121 +864,163 @@ app.post('/deploynftcontract2', (req, res, next) => {
 
 
 app.post('/claimairdrop', async (req, res) => {
-    console.log("NFT minting started");
     console.log(req.body);
-    console.log(await ethers.provider.getTransactionCount(req.body.userAddress));
-    var newNonce = await ethers.provider.getTransactionCount(req.body.userAddress) + 1;
-    const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
-    //console.log(MonalizaFactory);
-    const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
-    //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
-    var options = { nonce: newNonce};
+    //if(! req.body.tokenID) res.send({message: "toeknID not available"});
+    //STEP 1: Check if already airdropped or not (check in Mongo DB)
 
-    var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL);
-    console.log(sendPromise);
-    var eventCounter = 0;
-    monalizaFactory.on("Mint", (address, tokenID) => {
-    //console.log(address);
-        if(address == req.body.assetContractAddress && eventCounter == 0){
-            console.log("NFT token ID " + tokenID);
-            eventCounter ++;
-            //console.log("NFT minted transaction id is " + tokenID);
+
+    //STEP 2: Check if signature is for the user address in request or not
+    console.log("NFT minting started");
+    
+    //Get user address from sign
+    //const signingAddress = Web3.eth.personal.ecRecover("claimairdrop", sign);
+    //console.log(signingAddress.userAddress);
+
+    const recovered = ethSigUtil.recoverPersonalSignature({data: req.body.msgHash, signature: req.body.sign});
+    console.log(recovered);
+    var checkIfClaimed = await checkAirdropClaimedInMongo(req.body.userAddress, req.body.assetContractAddress);
+
+    //var checkIfClaimed = await checkAirdropClaimedInMongo(req.body.userAddress, req.body.assetContractAddress);
+    console.log("printing checkIfClaimed");
+    console.log(checkIfClaimed);
+    if(req.body.assetContractAddress && checkIfClaimed.length > 0){
+        res.send({message: "asset contract already claimed once"});
+        return;
+    }
+
+    if((recovered.toUpperCase() == req.body.userAddress.toUpperCase()) && checkIfClaimed.length < 1 && req.body.assetContractAddress){
+        console.log(await ethers.provider.getTransactionCount(req.body.userAddress));
+        var newNonce = await ethers.provider.getTransactionCount(req.body.userAddress) + 1;
+        const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+        //console.log(MonalizaFactory);
+        const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+        //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
+        var options = { nonce: newNonce};
+    
+        var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL);
+        console.log(sendPromise);
+        var eventCounter = 0;
+        monalizaFactory.on("Mint", (address, tokenID) => {
+        //console.log(address);
+            if(address == req.body.assetContractAddress && eventCounter == 0){
+                console.log("NFT token ID " + tokenID);
+                eventCounter ++;
+                //console.log("NFT minted transaction id is " + tokenID);
+                //add to airdropped list and prevent duplicate claim
+                //console.log(result);
+                //console.log("tokenID is " + tokenID);
+                res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
+                /*var allAirdropsClaimed;
+                var allAirdropsClaimedDetails;
+                try{
+                    allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+                    //console.log(airdropDetails);
+                }catch(e){
+            
+                }*/
+                saveAirdropClaimedInMongo(req, tokenID.toString())
+                .then(console.log)
+                .catch(console.error)
+                .finally(() => client.close());
+    
+                    /*if(allAirdropsClaimedDetails != undefined){
+                        allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+                    }else{
+                        allAirdropsClaimed = new Array();
+                    }
+                    allAirdropsClaimed.push({
+                        "assetContractAddress": req.body.assetContractAddress,
+                        "airdropAddress": req.body.userAddress,
+                        "tokenID": tokenID.toString()
+                    })  
+                    db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
+                    //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
+                    db.sync();*/
+           
+            }
+        })
+
+
+        async function saveAirdropClaimedInMongo(req, tokenIDValue){
+            try{
+                await client.connect();
+                console.log('Connected successfully to mongo server');
+                const db = client.db(dbName);
+                const collection = db.collection('airdropClaimed');
+                
+                // the following code examples can be pasted here...
+                const insertResult = await collection.insertOne({
+                    "assetContractAddress": req.body.assetContractAddress,
+                    "airdropAddress": req.body.userAddress,
+                    "tokenID": tokenIDValue
+                });
+                console.log('Inserted documents =>', insertResult);
+            }catch(e){
+                console.log(e);
+            }finally{
+                client.close();
+            }
+        
+           return 'done.';
+        }
+        
+        
+        /*monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000}).then
+        (function(result){
+            console.log("NFT minted transaction id is " + result.tx);
             //add to airdropped list and prevent duplicate claim
-            //console.log(result);
-            //console.log("tokenID is " + tokenID);
-            res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
-            /*var allAirdropsClaimed;
+            console.log(result);
+            console.log("tokenID is " + result.receipt.logs[0].args.newItemId);
+            res.send({"txID": result.tx, assetContractID: req.body.assetContractAddress, tokenID: result.receipt.logs[0].args.newItemId});
+            var allAirdropsClaimed;
             var allAirdropsClaimedDetails;
             try{
                 allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
                 //console.log(airdropDetails);
             }catch(e){
         
-            }*/
-            saveAirdropClaimedInMongo(req, tokenID.toString())
-            .then(console.log)
-            .catch(console.error)
-            .finally(() => client.close());
-
-                /*if(allAirdropsClaimedDetails != undefined){
-                    allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
-                }else{
-                    allAirdropsClaimed = new Array();
-                }
-                allAirdropsClaimed.push({
-                    "assetContractAddress": req.body.assetContractAddress,
-                    "airdropAddress": req.body.userAddress,
-                    "tokenID": tokenID.toString()
-                })  
-                db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
-                //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
-                db.sync();*/
+            }
+        
+            if(allAirdropsClaimedDetails != undefined){
+                allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
+            }else{
+                allAirdropsClaimed = new Array();
+            }
+            allAirdropsClaimed.push({
+                "assetContractAddress": req.body.assetContractAddress,
+                "airdropAddress": req.body.userAddress,
+                "tokenID": result.receipt.logs[0].args.newItemId
+            })  
+            db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
+            //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
+            db.sync();
        
-        }
-    })
+        }).catch(function(err) {
+           console.log(err);
+        });*/
+    
+    
+    }
 
-    async function saveAirdropClaimedInMongo(req, tokenIDValue){
+    async function checkAirdropClaimedInMongo(userAddress, assetContractAddress){
+        var result;
         try{
             await client.connect();
             console.log('Connected successfully to mongo server');
             const db = client.db(dbName);
             const collection = db.collection('airdropClaimed');
-            
-            // the following code examples can be pasted here...
-            const insertResult = await collection.insertOne({
-                "assetContractAddress": req.body.assetContractAddress,
-                "airdropAddress": req.body.userAddress,
-                "tokenID": tokenIDValue
-            });
-            console.log('Inserted documents =>', insertResult);
+            result = await collection.find({airdropAddress: userAddress, assetContractAddress: assetContractAddress}).toArray();
+            console.log(result)
+
         }catch(e){
             console.log(e);
         }finally{
             client.close();
+            return result;
         }
     
-       return 'done.';
-    }
-    
-    
-    /*monalizaInstance.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL , {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000}).then
-    (function(result){
-        console.log("NFT minted transaction id is " + result.tx);
-        //add to airdropped list and prevent duplicate claim
-        console.log(result);
-        console.log("tokenID is " + result.receipt.logs[0].args.newItemId);
-        res.send({"txID": result.tx, assetContractID: req.body.assetContractAddress, tokenID: result.receipt.logs[0].args.newItemId});
-        var allAirdropsClaimed;
-        var allAirdropsClaimedDetails;
-        try{
-            allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
-            //console.log(airdropDetails);
-        }catch(e){
-    
-        }
-    
-        if(allAirdropsClaimedDetails != undefined){
-            allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
-        }else{
-            allAirdropsClaimed = new Array();
-        }
-        allAirdropsClaimed.push({
-            "assetContractAddress": req.body.assetContractAddress,
-            "airdropAddress": req.body.userAddress,
-            "tokenID": result.receipt.logs[0].args.newItemId
-        })  
-        db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
-        //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
-        db.sync();
-   
-    }).catch(function(err) {
-       console.log(err);
-    });*/
-
-
-
-
-
+       //return 'done.';
+    }    
    
 })
 
