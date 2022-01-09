@@ -7,7 +7,7 @@ process.on('uncaughtException', (err) => {
 let MonalizaArtifact = require("./build/contracts/MonalizaFactory.json");
 let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
 
-const HDWalletProvider = require("@truffle/hdwallet-provider");
+//const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bodyParser = require('body-parser')
 const request = require('request');
 const fs = require('fs');
@@ -261,7 +261,7 @@ console.log(FROM_ACCOUNT);
 
 //var Monaliza = TruffleContract(MonalizaArtifact);
 //var MonalizaNFT = TruffleContract(MonalizaNFTArtifact);
-var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
+//var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
 
 /*var web3Provider = new HDWalletProvider({
     mnemonic: {
