@@ -3,7 +3,7 @@ process.on('uncaughtException', (err) => {
     console.log('whoops! there was an error');
  });
 
-var TruffleContract = require("@truffle/contract");
+//var TruffleContract = require("@truffle/contract");
 let MonalizaArtifact = require("./build/contracts/MonalizaFactory.json");
 let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
 
@@ -15,10 +15,10 @@ const https = require('https');
 const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
 const multer = require('multer');
-const JSONdb = require('simple-json-db');
+//const JSONdb = require('simple-json-db');
 const csv = require('csv-parser')
 
-const db = new JSONdb('database.json', {});
+//const db = new JSONdb('database.json', {});
 const ffmpeg = require('ffmpeg-static');
 console.log(ffmpeg);
 const genThumbnail = require('simple-thumbnail');
@@ -29,8 +29,8 @@ const API_URL = process.env.API_URL
 const PUBLIC_KEY = process.env.PUBLIC_KEY
 const PRIVATE_KEY = process.env.PRIVATE_KEY
 console.log(API_URL)
-const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
-const alchemyWeb3 = createAlchemyWeb3(API_URL)
+//const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
+//const alchemyWeb3 = createAlchemyWeb3(API_URL)
 const { ethers } = require("hardhat");
 const { MongoClient } = require('mongodb');
 
@@ -259,8 +259,8 @@ app.use(morgan('dev'));
 
 console.log(FROM_ACCOUNT);
 
-var Monaliza = TruffleContract(MonalizaArtifact);
-var MonalizaNFT = TruffleContract(MonalizaNFTArtifact);
+//var Monaliza = TruffleContract(MonalizaArtifact);
+//var MonalizaNFT = TruffleContract(MonalizaNFTArtifact);
 var web3Provider = new HDWalletProvider(mnemonic, RINKEBY_RPC_URL);
 
 /*var web3Provider = new HDWalletProvider({
