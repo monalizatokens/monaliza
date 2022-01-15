@@ -12,6 +12,7 @@ module.exports = {
       matic: {
          url: API_URL,
          accounts: [`0x${PRIVATE_KEY}`]
+         //gas: 2100000, gasPrice: 8000000000
       }
    },
 }

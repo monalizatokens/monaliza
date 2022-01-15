@@ -133,7 +133,7 @@ var cors = require('cors')
 
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 
-var monalizaFactoryContractAddress = "0x180f26defae5aad05544ca0562b47985a491cbff";
+var monalizaFactoryContractAddress = "0x4a2cfea8fe1be4527c188f248f1842c6df86e11c";
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
 
 async function testhh(){
@@ -380,26 +380,46 @@ function createAirDrops(req){
 
 async function saveAirdropInMongo(airdropAddresses, req){
     try{
-        await client.connect();
-        console.log('Connected successfully to mongo server');
-        const db = client.db(dbName);
-        const collection = db.collection('airdrop');
-        
-        // the following code examples can be pasted here...
-        const insertResult = await collection.insertOne({
-            "creatorAddress": req.body.creatorAddress,
-            "assetContractAddress": req.body.assetContractAddress,
-            "airdropAddresses": airdropAddresses,
-            "creationDate": req.body.creationDate,
-            "assetName": req.body.assetName,
-            "description": req.body.description,
-            "ipfsURL": req.body.ipfsURL,
-            "docURL": req.body.docURL,
-            "fileName": req.body.fileName
+        //
+        const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+        //console.log(MonalizaFactory);
+        const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+        //var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
+        var sendPromise = monalizaFactory.addAirDrop(req.body.assetContractAddress, airdropAddresses);
+        sendPromise.then(function(transaction){
+            console.log(transaction);
         });
-        console.log('Inserted documents =>', insertResult);
-    }catch(e){
 
+        monalizaFactory.on("AddAirDrop", async (address)  => {
+            console.log("Airdrop addresses added on-chain for " + address);
+            var addressAllowed = monalizaFactory.isAddressAllowedForMinting(req.body.assetContractAddress, airdropAddresses[0]);
+            addressAllowed.then(async function(status){
+                console.log(status);
+
+                await client.connect();
+                console.log('Connected successfully to mongo server');
+                const db = client.db(dbName);
+                const collection = db.collection('airdrop');
+                
+                // the following code examples can be pasted here...
+                const insertResult = await collection.insertOne({
+                    "creatorAddress": req.body.creatorAddress,
+                    "assetContractAddress": req.body.assetContractAddress,
+                    "airdropAddresses": airdropAddresses,
+                    "creationDate": req.body.creationDate,
+                    "assetName": req.body.assetName,
+                    "description": req.body.description,
+                    "ipfsURL": req.body.ipfsURL,
+                    "docURL": req.body.docURL,
+                    "fileName": req.body.fileName
+                });
+                console.log('Inserted documents =>', insertResult);
+            })
+        })
+
+ 
+    }catch(e){
+        console.log(e);
     }finally{
         client.close();
     }
@@ -876,7 +896,7 @@ app.post('/claimairdrop', async (req, res) => {
     //const signingAddress = Web3.eth.personal.ecRecover("claimairdrop", sign);
     //console.log(signingAddress.userAddress);
 
-    const recovered = ethSigUtil.recoverPersonalSignature({data: req.body.msgHash, signature: req.body.sign});
+    const recovered = ethSigUtil.recoverPersonalSignature({data: req.body.msg, signature: req.body.sign});
     console.log(recovered);
     var checkIfClaimed = await checkAirdropClaimedInMongo(req.body.userAddress, req.body.assetContractAddress);
 
@@ -896,9 +916,28 @@ app.post('/claimairdrop', async (req, res) => {
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
         //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
         var options = { nonce: newNonce};
+
+        var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
     
-        var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL);
+        var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.userAddress, req.body.ipfsURL, gasFeeOptions);
         console.log(sendPromise);
+        //Check if transaction hash is sucessful
+        //https://ethereum.stackexchange.com/questions/80617/how-can-i-know-a-hash-mined-and-confirmed-by-ethers-js/80622
+        var delayInMilliseconds = 5000; //1 second
+
+        const sayHello = async (name) => {
+            console.log(`Hello ${name}. Welcome to KindaCode.com`);
+            var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
+            console.log(tokenIDObtained);
+            console.log("token ID from fn call is " + tokenIDObtained.toString());
+          }
+          
+          console.log('Waiting...');
+          setTimeout(sayHello, 6000, 'John Doe');
+
+        //Invoke contract function getLastTokenID(Monaliza contractAddress) and get tokenID
+
+
         var eventCounter = 0;
         monalizaFactory.on("Mint", (address, tokenID) => {
         //console.log(address);

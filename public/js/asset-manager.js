@@ -142,6 +142,19 @@ $( document ).ready(function() {
     $("#fileuploaderform").submit(function(e){
         //$("#fileuploaderform").submit();
         //event.preventDefault()
+        //onConnect();
+        if(accountHere == ""){
+            $.showNotification({
+                body:"<h3>" + "File could not be uploaded. Please connect your wallet first and upload again." + "</h3>",
+                duration: 1200,
+                maxWidth:"820px",
+                shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                zIndex: 100,
+                margin:"5rem"
+            });
+            return;
+        }
+
         console.log("In fileupload handler")
         $.ajax( {
             url: '/fileupload',
@@ -179,8 +192,9 @@ $( document ).ready(function() {
             if(validationStatus == true){
                 var signedMessage;
                 async function signMessage(){
+                    console.log("signing now");
                     const web3Instance = new Web3(provider);
-                    msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"), {encoding: "hex"})
+                    msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"))
                     //if (!accountHere) return connect()
                     var sign = "";
                     web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
@@ -483,10 +497,13 @@ $( document ).ready(function() {
             var ipfsURL = $( this ).attr("ipfsurl");
             const web3Instance = new Web3(provider);
             var buttonThis = this;
-            msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("claimairdrop"), {encoding: "hex"})
+            //msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("claimairdrop"), {encoding: "hex"})
+            var msg = "I am claiming airdrop.";
+            msgHash = web3Instance.utils.sha3("claimairdrop")
             //if (!accountHere) return connect()
             var sign = "";
-            web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
+            //web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
+            web3Instance.eth.personal.sign(msg, accountHere, function (err, result) {
                 if (err) return console.error(err)
                 console.log('SIGNED:' + result)
                 sign = result;
@@ -508,7 +525,7 @@ $( document ).ready(function() {
                                 "userAddress": accountHere,
                                 "assetContractAddress": assetContractAddress,
                                 "ipfsURL": ipfsURL,
-                                "msgHash": msgHash,
+                                "msg": msg,
                                 "sign": sign
                             }
                             $("#myProgress").show();

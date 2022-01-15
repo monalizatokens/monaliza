@@ -12,10 +12,26 @@ contract Monaliza is ERC721Tradable {
     string private _localBaseURI;
     mapping (uint256 => string) private _tokenURIs;
     //mapping (uint256 => string) private _tokenURIs;
+    mapping (address => bool) public allowedAddresses;
+
 
     constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress)
         ERC721Tradable(tokenName, symbol, _proxyRegistryAddress)
-    {}
+    {
+        
+    }
+
+    function setAddressesAllowedForMinting(address[] memory addressesAllowedForMinting) public virtual {
+        //require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
+        //addressesAllowedForMinting = addressesAllowedForMinting;
+        for (uint i=0; i < addressesAllowedForMinting.length; i++) {
+            allowedAddresses[addressesAllowedForMinting[i]] = true;
+        }
+    }
+
+    function isAddressAllowed(address to) public view returns (bool){
+        return allowedAddresses[to];
+    }
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) public virtual {
         require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
@@ -50,6 +66,12 @@ contract MonalizaFactory {
     mapping (address => uint256) public lastTokenIDs;
     event Mint(Monaliza tokenAddress, uint256 newItemId); 
     event DeployContract(string name, string symbol, address newContract); 
+    event AddAirDrop(address tokenAddress); 
+    address owner;
+
+    constructor() public{
+      owner = msg.sender;
+    }   
 
     function getContractCount() public view returns(uint contractCount) {
         return contracts.length;
@@ -70,20 +92,37 @@ contract MonalizaFactory {
          return cAddr;
     }
 
-    function mintNFT(Monaliza tokenAddress, address to, string memory tokenURI) public returns(uint256 newItemId) {
- 
-        newItemId = tokenAddress.mintTo(to);
-        tokenAddress._setTokenURI(newItemId, tokenURI);
-        lastTokenIDs[address(tokenAddress)] = newItemId;
+    function addAirDrop(Monaliza tokenAddress, address[] memory addressesAllowedForMinting) public returns(address contractAddress){
+         require(msg.sender == owner);
+         tokenAddress.setAddressesAllowedForMinting(addressesAllowedForMinting);
+         //c.setLocalBaseURI(baseURI);
+         address cAddr = address(tokenAddress);
+         emit AddAirDrop(cAddr);
+        return cAddr;
+    }
 
-        emit Mint(tokenAddress, newItemId);
-        return newItemId;
+    function mintNFT(Monaliza tokenAddress, address to, string memory tokenURI) public returns(uint256 newItemId) {
+        require(msg.sender == owner);
+
+        if(tokenAddress.isAddressAllowed(to)){
+                newItemId = tokenAddress.mintTo(to);
+                tokenAddress._setTokenURI(newItemId, tokenURI);
+                lastTokenIDs[address(tokenAddress)] = newItemId;
+
+                emit Mint(tokenAddress, newItemId);
+                return newItemId;
+        }
+
     }    
 
     function getLastTokenID(Monaliza contractAddress) public view returns(uint256 newItemId) {
         newItemId = lastTokenIDs[address(contractAddress)];
         return newItemId;
     }    
+
+    function isAddressAllowedForMinting(Monaliza contractAddress, address userAddress) public view returns(bool) {
+        return contractAddress.isAddressAllowed(userAddress);  
+    }   
 
     function getBaseTokenURI(Monaliza contractAddress) public view returns(string memory baseURI) {
         baseURI = contractAddress.baseTokenURI();
