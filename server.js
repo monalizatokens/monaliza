@@ -396,27 +396,28 @@ async function saveAirdropInMongo(airdropAddresses, req){
             addressAllowed.then(async function(status){
                 console.log(status);
 
-                await client.connect();
-                console.log('Connected successfully to mongo server');
-                const db = client.db(dbName);
-                const collection = db.collection('airdrop');
-                
-                // the following code examples can be pasted here...
-                const insertResult = await collection.insertOne({
-                    "creatorAddress": req.body.creatorAddress,
-                    "assetContractAddress": req.body.assetContractAddress,
-                    "airdropAddresses": airdropAddresses,
-                    "creationDate": req.body.creationDate,
-                    "assetName": req.body.assetName,
-                    "description": req.body.description,
-                    "ipfsURL": req.body.ipfsURL,
-                    "docURL": req.body.docURL,
-                    "fileName": req.body.fileName
-                });
-                console.log('Inserted documents =>', insertResult);
+
             })
         })
 
+        await client.connect();
+        console.log('Connected successfully to mongo server');
+        const db = client.db(dbName);
+        const collection = db.collection('airdrop');
+        
+        // the following code examples can be pasted here...
+        const insertResult = await collection.insertOne({
+            "creatorAddress": req.body.creatorAddress,
+            "assetContractAddress": req.body.assetContractAddress,
+            "airdropAddresses": airdropAddresses,
+            "creationDate": req.body.creationDate,
+            "assetName": req.body.assetName,
+            "description": req.body.description,
+            "ipfsURL": req.body.ipfsURL,
+            "docURL": req.body.docURL,
+            "fileName": req.body.fileName
+        });
+        console.log('Inserted documents =>', insertResult);
  
     }catch(e){
         console.log(e);
