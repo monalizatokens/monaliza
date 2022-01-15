@@ -384,8 +384,8 @@ async function saveAirdropInMongo(airdropAddresses, req){
         const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
         //console.log(MonalizaFactory);
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
-        //var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
-        var sendPromise = monalizaFactory.addAirDrop(req.body.assetContractAddress, airdropAddresses);
+        var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
+        var sendPromise = monalizaFactory.addAirDrop(req.body.assetContractAddress, airdropAddresses, gasFeeOptions);
         sendPromise.then(function(transaction){
             console.log(transaction);
         });
