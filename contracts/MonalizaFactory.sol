@@ -67,6 +67,7 @@ contract MonalizaFactory {
     event Mint(Monaliza tokenAddress, uint256 newItemId); 
     event DeployContract(string name, string symbol, address newContract); 
     event AddAirDrop(address tokenAddress); 
+    event TransferToken(Monaliza tokenAddress, address toAddress, uint256 tokenId);
     address owner;
 
     constructor() public{
@@ -113,7 +114,14 @@ contract MonalizaFactory {
                 return newItemId;
         }
 
-    }    
+    }   
+
+    function transferToken(Monaliza tokenAddress, address from, address to, uint256 tokenID) public returns(uint256 newItemId) {
+        //require(msg.sender == tokenAddress.owner());
+        tokenAddress.safeTransferFrom(from, to, tokenID);
+        emit TransferToken(tokenAddress, to, tokenID);
+        return tokenID;
+    }     
 
     function getLastTokenID(Monaliza contractAddress) public view returns(uint256 newItemId) {
         newItemId = lastTokenIDs[address(contractAddress)];

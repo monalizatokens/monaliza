@@ -132,8 +132,11 @@ require('dotenv').config();
 var cors = require('cors')
 
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
+const monaLizaContract = require("./build/contracts/Monaliza.json")
 
-var monalizaFactoryContractAddress = "0x4a2cfea8fe1be4527c188f248f1842c6df86e11c";
+var monalizaFactoryContractAddress = "0x0c7c0aa1c4c2a2b4e3a01f4b16106117c9e1ef90";
+var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
+
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
 
 async function testhh(){
@@ -430,7 +433,7 @@ async function saveAirdropInMongo(airdropAddresses, req){
 
 app.get('/getairdropsforuser', async (req, res, next) => {
     console.log("In getairdropsforuser");
-    console.log(req.query.useraddress);
+    //console.log(req.query.useraddress);
     var userAddress = req.query.useraddress;
     var userRelevantAssets = []
     try{
@@ -447,8 +450,8 @@ app.get('/getairdropsforuser', async (req, res, next) => {
         for(var i=0; i <allAirdrops.length; i++){
             if(allAirdrops[i].airdropAddresses){
                 for(var j=0; j <allAirdrops[i].airdropAddresses.length; j++){
-                    console.log(userAddress);
-                    console.log(allAirdrops[i].airdropAddresses[j]);
+                    //console.log(userAddress);
+                    //console.log(allAirdrops[i].airdropAddresses[j]);
                     try{
                         if(userAddress.toUpperCase()  === allAirdrops[i].airdropAddresses[j].toUpperCase()){
                             var claimDetails = {}
@@ -486,7 +489,7 @@ app.get('/getairdropsforuser', async (req, res, next) => {
         claimDetails.claimed = false;
         var allAirdropsClaimed;
         var allAirdropsClaimedDetails = allAirdropsClaimed;
-        console.log(allAirdropsClaimedDetails);
+        //console.log(allAirdropsClaimedDetails);
         for(var i=0; i <allAirdropsClaimedDetails.length; i++){
             if((allAirdropsClaimedDetails[i].airdropAddress.toUpperCase() == userAddress.toUpperCase()) && (allAirdropsClaimedDetails[i].assetContractAddress.toUpperCase() == assetContractAddress.toUpperCase())){
                 claimDetails.claimed = true;
@@ -496,7 +499,7 @@ app.get('/getairdropsforuser', async (req, res, next) => {
         return claimDetails;
       }
 
-    console.log(userRelevantAssets);  
+    //console.log(userRelevantAssets);  
     res.json(userRelevantAssets);
 })
 
@@ -897,8 +900,8 @@ app.post('/claimairdrop', async (req, res) => {
     //const signingAddress = Web3.eth.personal.ecRecover("claimairdrop", sign);
     //console.log(signingAddress.userAddress);
 
-    const recovered = ethSigUtil.recoverPersonalSignature({data: req.body.msg, signature: req.body.sign});
-    console.log(recovered);
+    //const recovered = ethSigUtil.recoverPersonalSignature({data: req.body.msg, signature: req.body.sign});
+    //console.log(recovered);
     var checkIfClaimed = await checkAirdropClaimedInMongo(req.body.userAddress, req.body.assetContractAddress);
 
     //var checkIfClaimed = await checkAirdropClaimedInMongo(req.body.userAddress, req.body.assetContractAddress);
@@ -909,12 +912,15 @@ app.post('/claimairdrop', async (req, res) => {
         return;
     }
 
-    if((recovered.toUpperCase() == req.body.userAddress.toUpperCase()) && checkIfClaimed.length < 1 && req.body.assetContractAddress){
+    if(checkIfClaimed.length < 1 && req.body.assetContractAddress){
+    //if((recovered.toUpperCase() == req.body.userAddress.toUpperCase()) && checkIfClaimed.length < 1 && req.body.assetContractAddress){
         console.log(await ethers.provider.getTransactionCount(req.body.userAddress));
         var newNonce = await ethers.provider.getTransactionCount(req.body.userAddress) + 1;
         const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+        const Monaliza = await ethers.getContractFactory('Monaliza');
         //console.log(MonalizaFactory);
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+        const monaliza = await Monaliza.attach(monalizaContractAddress);
         //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
         var options = { nonce: newNonce};
 
@@ -931,6 +937,10 @@ app.post('/claimairdrop', async (req, res) => {
             var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
             console.log(tokenIDObtained);
             console.log("token ID from fn call is " + tokenIDObtained.toString());
+            /*var sendPromise = await monaliza.approve("0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
+            console.log(sendPromise);
+            var sendPromise2 = await monaliza.transferFrom("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5", "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
+            console.log(sendPromise2);*/
           }
           
           console.log('Waiting...');
@@ -1226,6 +1236,26 @@ app.get('/assetsforuseraddress', async function (req, res) {
     console.log(userCreatedAssets);
     res.json(userCreatedAssets);
 })
+
+app.post('/findpublicaddressbyemail', async (req, res) => {
+     console.log(req.body);
+     if(req.body.email == "sanjeevkumar761@gmail.com"){
+        res.json({"publicAddress": "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", "email": "georgesmith9914@gmail.com"})
+     }else if(req.body.email == "aina.fournier@gmail.com"){
+        res.json({"publicAddress": "0xCd04943Ef3D7250603927d4038a88Bb15342b7A5", "email": "aina.fournier@gmail.com"})
+     }
+     
+});
+
+app.post('/movetokentosent', async (req, res) => {
+    console.log(req.body);
+
+    
+});
+
+
+
+
 
 httpsServer.listen(443)
 /*app.listen(port, () => {
