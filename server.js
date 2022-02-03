@@ -10,13 +10,13 @@ let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
 //const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bodyParser = require('body-parser')
 const request = require('request');
-const fs = require('fs');
 const https = require('https');
 const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
 const multer = require('multer');
 //const JSONdb = require('simple-json-db');
 const csv = require('csv-parser')
+const base64 = require('js-base64').Base64;
 
 //const db = new JSONdb('database.json', {});
 const ffmpeg = require('ffmpeg-static');
@@ -38,6 +38,11 @@ const { MongoClient } = require('mongodb');
 const url = 'mongodb://' + require("./secret.json").mongo_db_user + ":" + require("./secret.json").mongo_db_pwd + "@" +  require("./secret.json").mongo_db_ip +':27017';
 const client = new MongoClient(url);
 const dbName = 'monaliza';
+
+const fs = require('fs');
+const readline = require('readline');
+const {google} = require('googleapis');
+
 
 /*async function main() {
     // Use connect method to connect to the server
@@ -674,6 +679,31 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
         return 'done.';
     }
 
+    async function saveAssetInMongoFromEmail(address, contractDetails, metadataResult){
+        console.log("In saveAssetInMongo from email" + contractDetails.assetName + " " + contractDetails.assetSymbol + " " + contractDetails.description)
+        await client.connect();
+        console.log('Connected successfully to mongo server');
+        const db = client.db(dbName);
+        const collection = db.collection('assets');
+        
+        // the following code examples can be pasted here...
+        const insertResult = await collection.insertOne({
+            "assetContractID": address,
+            "assetName": contractDetails.assetName,
+            "assetSymbol": contractDetails.assetSymbol,
+            "assetType": "ERC721",
+            "creatorAddress": contractDetails.creatorAddress,
+            "imageSrc": contractDetails.fileName,
+            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash + "?filename=metadata.json",
+            "contentSrc": contractDetails.fileName,
+            "docURL": contractDetails.docURL || '',
+            "description": contractDetails.description  || ''
+        });
+        console.log('Inserted documents =>', insertResult);
+        //res.json({"contractAddress": address});
+        return 'done.';
+    }
+
     async function processNFTContractDeployment(req, res){
             //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
             var name = req.body.assetName;
@@ -1253,8 +1283,444 @@ app.post('/movetokentosent', async (req, res) => {
     
 });
 
+app.get('/checkemails', async (req, res) => {
+    // Load client secrets from a local file.
+ 
+    fs.readFile('credentials.json', (err, content) => {
+        console.log(JSON.parse(content));
+    if (err) return console.log('Error loading client secret file:', err);
+    // Authorize a client with credentials, then call the Gmail API.
+    authorize(JSON.parse(content), listMessages);
+    //authorize(JSON.parse(content), watchEmail);
+
+    //authorize(JSON.parse(content), listLabels);
+    });
+    res.json({"message": "emails being fetched"});
+});
+
+var minutes = 5, the_interval = minutes * 60 * 1000;
+setInterval(function() {
+  console.log("I am doing my 5 minutes check");
+  // do your stuff here
+  fs.readFile('credentials.json', (err, content) => {
+    console.log(JSON.parse(content));
+    if (err) return console.log('Error loading client secret file:', err);
+    // Authorize a client with credentials, then call the Gmail API.
+    authorize(JSON.parse(content), listMessages);
+    //authorize(JSON.parse(content), watchEmail);
+
+    //authorize(JSON.parse(content), listLabels);
+    });
+}, the_interval);
 
 
+// If modifying these scopes, delete token.json.
+const SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
+const TOKEN_PATH = 'token.json';
+
+
+
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
+function authorize(credentials, callback) {
+  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const oAuth2Client = new google.auth.OAuth2(
+      client_id, client_secret, redirect_uris[0]);
+
+  // Check if we have previously stored a token.
+  fs.readFile(TOKEN_PATH, (err, token) => {
+    if (err) return getNewToken(oAuth2Client, callback);
+    oAuth2Client.setCredentials(JSON.parse(token));
+    callback(oAuth2Client);
+  });
+}
+
+/**
+ * Get and store new token after prompting for user authorization, and then
+ * execute the given callback with the authorized OAuth2 client.
+ * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
+ * @param {getEventsCallback} callback The callback for the authorized client.
+ */
+function getNewToken(oAuth2Client, callback) {
+  const authUrl = oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+  });
+  console.log('Authorize this app by visiting this url:', authUrl);
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+  rl.question('Enter the code from that page here: ', (code) => {
+    rl.close();
+    oAuth2Client.getToken(code, (err, token) => {
+      if (err) return console.error('Error retrieving access token', err);
+      oAuth2Client.setCredentials(token);
+      // Store the token to disk for later program executions
+      fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        if (err) return console.error(err);
+        console.log('Token stored to', TOKEN_PATH);
+      });
+      callback(oAuth2Client);
+    });
+  });
+}
+
+/**
+ * Lists the labels in the user's account.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+function listLabels(auth) {
+  const gmail = google.gmail({version: 'v1', auth});
+  gmail.users.labels.list({
+    userId: 'me',
+  }, (err, res) => {
+    if (err) return console.log('The API returned an error: ' + err);
+    const labels = res.data.labels;
+    if (labels.length) {
+      console.log('Labels:');
+      labels.forEach((label) => {
+        console.log(`- ${label.name}`);
+      });
+    } else {
+      console.log('No labels found.');
+    }
+  });
+}
+
+function watchEmail(auth){
+    const gmail = google.gmail({version: 'v1', auth});
+    gmail.users.watch({
+        userId: 'me',
+      }, (err, res) => {
+          console.log("user watch");
+          console.log(err);
+          console.log(res);
+    })
+}
+
+/**
+ * Lists the labels in the user's account.
+ *
+ * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
+ */
+ function listMessages(auth) {
+    const gmail = google.gmail({version: 'v1', auth});
+    gmail.users.messages.list({
+      userId: 'me',
+      labelIds:['UNREAD']
+    }, (err, res) => {
+      if (err) return console.log('The API returned an error: ' + err);
+      console.log(res.data)
+      const messages = res.data.messages;
+      if (messages.length) {
+        console.log('Messages:');
+        messages.forEach((message) => {
+          console.log(`- ${message.id}`);
+          var fromEmail, assetName, assetSymbol, creatorAddress, description, imageName;
+
+          gmail.users.messages.get({userId: 'me', id: message.id}, function (err, response) {
+            if (err) {
+                console.log('The API returned an error: ' + err);
+                return;
+            }
+             email = response.data
+             console.log(email)
+
+             
+
+             for(var j=0; j < email.payload.parts.length; j++){
+                    //if (j < 2){
+                        console.log(JSON.stringify(email.payload.parts[0].parts[0].body))
+                        description = base64.decode(JSON.stringify(email.payload.parts[0].parts[0].body.data)).split('\n')[0]
+                        console.log(description)
+                    //}
+
+                    if((email.payload.parts[j].filename != "") && (email.payload.parts[j].mimeType == "image/png")){
+                        console.log(JSON.stringify(email.payload.parts[j].filename))
+
+                        gmail.users.messages.attachments.get({
+                            userId: 'me',
+                            messageId: message.id,
+                            id: email.payload.parts[j].body.attachmentId
+                        }, (err, {data}) => {
+                            if (err) return console.log('Error getting attachment: ' + err)
+                            //console.log('attachment' + JSON.stringify(data.data))
+
+                            var rawImg = data.data,
+                            base64Data = rawImg.replace(/^data:image\/png;base64,/, '')
+                            var dirpath = './public/uploads/'
+                            const uniquePreFix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+                            imageName = uniquePreFix + '.png'
+                            console.log(imageName)
+                            var imageLocation = dirpath + imageName;
+                            fs.writeFile(imageLocation, base64Data, 'base64', function(err) {
+                                for(var i=0; i < email.payload.headers.length; i++){
+                                    if(email.payload.headers[i].name == "Subject"){
+                                       assetName = JSON.stringify(email.payload.headers[i].value)
+                                       console.log("assetName " + assetName);
+                   
+                                       assetSymbol = assetName.substring(0,3).toUpperCase();
+                                   }
+                   
+                                   if(email.payload.headers[i].name == "From"){
+                                       var components = JSON.stringify(email.payload.headers[i]).split('<')
+                                       var emailAddress = components[1].replace('>', '');
+                                       emailAddress = emailAddress.replace('"', '');
+                                       emailAddress = emailAddress.replace('}', '');
+                                       emailAddress = emailAddress.replace('>', '');
+                                       fromEmail = emailAddress;
+                                       console.log("fromEmail " + fromEmail)
+                                   }
+                                }
+
+                                if(fromEmail == "georgesmith9914@gmail.com"){
+                                creatorAddress =  "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a"
+                                    }else if(fromEmail == "aina.fournier@gmail.com"){
+                                    creatorAddress = "0xCd04943Ef3D7250603927d4038a88Bb15342b7A5"
+                                }else if(fromEmail == "createnftnow@gmail.com"){
+                                    creatorAddress = "0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5"
+                                }
+                                console.log("creatorAddress " + creatorAddress);
+                                console.log(response);
+                                console.log("Preparing for NFT contract creation now");
+                                console.log(fromEmail)
+                                var contractDetails = {}
+                                var assetNameComponents = assetName.split('"')
+                                 assetName = assetNameComponents[1].replace('"', '');
+                                 assetName = assetName.replace('"', '');
+                                contractDetails.assetName = assetName;
+                                contractDetails.assetSymbol = assetSymbol;
+                                contractDetails.fileName = imageName;
+                                contractDetails.creatorAddress = creatorAddress;
+                                contractDetails.auth = auth;
+                                contractDetails.to = fromEmail;
+                                
+                                gmail.users.messages.modify({userId: 'me', id: message.id,
+                                    'resource': {
+                                        'addLabelIds':[],
+                                        'removeLabelIds': ['UNREAD']
+                                    }}, function (err, response) {
+                                    if (err) {
+                                        console.log('The API returned an error: ' + err);
+                                        return;
+                                    }
+                                    deployNFTContractbyEmail(contractDetails);    
+                                })
+
+                           });
+
+
+
+                        })    
+
+
+
+                        //Send email to sender email that NFT creation request has been received
+                        
+
+                        
+
+                        //If user account on Monaliza exists, create asset contract
+
+                        //Else park the asset file & details and ask user to create account
+                        //createAssetContractandSendEmail(auth, fromEmail, assetName, assetSymbol, creatorAddress, description);
+
+                        
+                        //sendMessage(auth);
+                        //console.log(JSON.stringify(email.payload.parts[j]))
+                    }
+            }
+        })
+
+       });
+      } else {
+        console.log('No messages found.');
+      }
+    });
+  }
+  function makeBody(to, subject, contractAddress) {
+    /*var str = ["Content-Type: text/plain; charset=\"UTF-8\"\n",
+        "MIME-Version: 1.0\n",
+        "Content-Transfer-Encoding: 7bit\n",
+        "to: ", to, "\n",
+        "from: ", from, "\n",
+        "subject: ", subject, "\n\n",
+        message
+    ].join('');
+
+    var encodedMail = new Buffer(str).toString("base64").replace(/\+/g, '-').replace(/\//g, '_');
+        return encodedMail; */
+        var message = "NFT asset created successfully. You can <a href='https://178.128.141.196/airdrop.html'>airdrop<a/> now on Monaliza. Check on Polygon scan " + "<a href='https://mumbai.polygonscan.com/address/" + contractAddress + "'>here<a/>"
+        var email =
+        "From: 'me'\r\n" +
+        "To: " + to + "\r\n" +
+        "Subject: " + subject + "\r\n" +
+        "Content-Type: text/html; charset='UTF-8'\r\n" +
+        "Content-Transfer-Encoding: base64\r\n\r\n" +
+        "<html><body>" +
+        message +
+        "</body></html>";
+        var encodedMail = new Buffer(email).toString("base64").replace(/\+/g, '-').replace(/\//g, '_');
+        return encodedMail; 
+    }
+
+  function sendMessage(to, auth, contractAddress) {
+    var raw = makeBody(to, 'NFT asset created successfully on Monaliza', contractAddress);
+    const gmail = google.gmail({version: 'v1', auth});
+    gmail.users.messages.send({
+        auth: auth,
+        userId: 'me',
+        resource: {
+            raw: raw
+        }
+    
+    }, function(err, response) {
+        console.log(err);
+        return(err || response)
+    });
+}
+
+  async function deployNFTContractbyEmail(contractDetails){
+        try {
+            console.log("Starting to execute deploynft");
+            console.log(contractDetails);
+            var name = contractDetails.assetName;
+            //name = name.replace('"', '');
+            var symbol = contractDetails.assetSymbol;
+            var fileName = contractDetails.fileName;
+            console.log(name + " " + symbol);
+            const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
+            //console.log(MonalizaFactory);
+            const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
+            var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, contractDetails.creatorAddress);
+            /*sendPromise.then(function(transaction){
+                console.log(transaction);
+            });*/
+            var eventCounter = 0;
+            monalizaFactory.on("DeployContract", (name, symbol, address) => {
+            //console.log(address);
+                if(name == contractDetails.assetName && symbol == contractDetails.assetSymbol && eventCounter == 0){
+                    console.log("NFT contract address " + address);
+                    eventCounter ++;
+                            //monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000})
+            //.then(function(value) {
+            //console.log(value);  
+            
+            //console.log("NFT contract address " + value.receipt.rawLogs[0].address);
+            //console.log(value.receipt.rawLogs[0].address);
+                //res.json({"contractAddress": value.receipt.rawLogs[0].address});
+                
+                    genThumbnail('./public/uploads/' + contractDetails.fileName, './public/uploads/' + contractDetails.fileName + '.png', '250x?')
+                    .then(() => {
+                        console.log('done!');
+                        const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + contractDetails.fileName + '.png');
+                        pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
+                            const readableStreamForFile = fs.createReadStream('./public/uploads/' + contractDetails.fileName);
+                                const options = {
+                                    pinataMetadata: {
+                                        name: "somename",
+                                        keyvalues: {
+                                            customKey: 'customValue',
+                                            customKey2: 'customValue2'
+                                        }
+                                    },
+                                    pinataOptions: {
+                                        cidVersion: 0
+                                    }
+                                };
+    
+                                pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                                    console.log("In pinFileToIPFS");
+                                    //handle results here
+                                    //console.log(result);
+                                //prepare metadata object
+                                var metadata= {
+                                    "name": contractDetails.assetName,
+                                    "description": contractDetails.description,
+                                    "image": "ipfs://" + thumbNailResult.IpfsHash,
+                                    "youtube_url": "https://ipfs.io/ipfs/" + result.IpfsHash
+                                }
+                                //Create metadata URI
+                                //TODO
+                                    const metadataOptions = {
+                                        pinataMetadata: {
+                                            name: "metadata",
+                                            keyvalues: {
+                                                customKey: 'customValue',
+                                                customKey2: 'customValue2'
+                                            }
+                                        },
+                                        pinataOptions: {
+                                            cidVersion: 0
+                                        }
+                                    };
+                                    pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                                        console.log("In pinJSONToIPFS");
+                                        saveAssetInMongoFromEmail(address, contractDetails, metadataResult)
+                                        .then(console.log)
+                                        .catch(console.error)
+                                        .finally(() => client.close());
+                                        //return 'done.';
+    
+                                        //var allAssets =  db.get('assets').assetDetails;
+                                        /*allAssets.push({
+                                            "assetContractID": address,
+                                            "assetName": req.body.assetName,
+                                            "assetSymbol": req.body.assetSymbol,
+                                            "assetType": "ERC721",
+                                            "creatorAddress": req.body.creatorAddress,
+                                            "imageSrc": req.body.fileName,
+                                            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                            "contentSrc": req.body.fileName,
+                                            "docURL": req.body.docURL || '',
+                                            "description": req.body.description  || ''
+                                        })  
+                                        db.set('assets', {"assetDetails": allAssets});  
+                                        db.sync();*/
+                                        sendMessage(contractDetails.to, contractDetails.auth, address);  
+                                    }).catch((err) => {
+                                        //handle error here
+                                        console.log(err);
+                                        //client.close();
+                                    });
+                                
+                                }).catch((err) => {
+                                    //handle error here
+                                    console.log(err);
+                                });
+                            
+    
+    
+                        }).catch((err) => {
+                            //handle error here
+                            console.log(err);
+                        });
+                    })
+                    .catch(err => console.error(err))
+                    }
+                
+    
+                });  
+            } catch (error) {
+                console.log(error)
+                return next(error)
+            }   
+        //processNFTContractDeployment(req, res)
+        //}).catch(function(err) {
+        //    console.log(err);
+        //});
+        //return monalizaInstance.mint(req.query.contractaddress, req.query.toaddress, req.query.tokenuri, {from: process.env.FROM_ACCOUNT, gas: 4600000});
+    }
+  
 
 
 httpsServer.listen(443)

@@ -7,3 +7,5 @@ database.json
 secret-rinkeby.json
 .env
 certs
+credentials.json
+token.json
