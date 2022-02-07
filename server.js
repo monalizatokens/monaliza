@@ -1298,7 +1298,7 @@ app.get('/checkemails', async (req, res) => {
     res.json({"message": "emails being fetched"});
 });
 
-var minutes = 5, the_interval = minutes * 60 * 1000;
+/*var minutes = 5, the_interval = minutes * 60 * 1000;
 setInterval(function() {
   console.log("I am doing my 5 minutes check");
   // do your stuff here
@@ -1311,7 +1311,7 @@ setInterval(function() {
 
     //authorize(JSON.parse(content), listLabels);
     });
-}, the_interval);
+}, the_interval);*/
 
 
 // If modifying these scopes, delete token.json.
