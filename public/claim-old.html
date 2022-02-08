@@ -17,7 +17,7 @@
 <body data-spy="scroll" data-target="#main-nav" id="home">
       <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
       <div class="container">
-          <a href="indexnew.html" class="navbar-brand font-weight-bold">Monaliza</a>
+          <a href="index1.html" class="navbar-brand font-weight-bold">Monaliza</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarcollapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -25,7 +25,7 @@
         <div class="collapse navbar-collapse" id="navbarcollapse">
           <ul class="navbar-nav ml-auto h5">
             <li class="nav-item">
-              <a class="nav-link" href="indexnew.html">Home</a>
+              <a class="nav-link" href="index.html">Home</a>
             </li>
            <!-- <li class="nav-item">
               <a class="nav-link" href="create.html">Create</a>
@@ -34,12 +34,12 @@
               <a class="nav-link" href="airdrop.html">Airdrop</a>
             </li> -->            
             <li class="nav-item active">
-              <a class="nav-link" href="claimnew.html">Claim</a>
+              <a class="nav-link" href="claim.html">Claim</a>
             </li> 
 
           </ul>
           
-            <button class="btn btn-lg btn-gradient text-white sign-in-btn ml-2">Sign In</button>
+            <button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>
             <i class="fas fa-user-circle fa-2x ml-3"></i>
         </div>
        </div> 
@@ -123,45 +123,6 @@
           </div>
         </div>
       </div>
-
-      <div id="signin" class="modal" tabindex="-1" role="dialog" assetContractID="" tokenID="">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Sign In</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <!--<p>Enter email address of recipient and send NFT.</p>-->
-    
-                <div class="form-group">
-                  <label for="useremailforsignin">Your email address</label>
-                  <input type="email" class="form-control mb-3" id="useremailforsignin" aria-describedby="emailHelp" placeholder="Enter your email address">
-                  <label for="userpinforsignin">Your 6-digit PIN </label>
-                  <input type="password" class="form-control" id="userpinforsignin" aria-describedby="emailHelp" placeholder="Enter 6-digit number as PIN">
-                    <!--<small id="emailHelp" class="form-text text-muted"></small>-->
-                </div>
-                <!--<div class="form-group">
-                  <label for="exampleInputPassword1">Password</label>
-                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                </div>
-                <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                  <label class="form-check-label" for="exampleCheck1">Check me out</label>
-                </div>-->
-                <button id="signinsubmitbtn" class="btn btn-primary">Submit</button>
-    
-            </div>
-            <!--<div class="modal-footer">
-              <button type="button" class="btn btn-primary">Send</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>-->
-          </div>
-        </div>
-      </div>
-
       <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
   crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -179,7 +140,7 @@
   <script src="https://github.com/ethereumjs/browser-builds/raw/master/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
 
   <script src=js/bootstrap-show-notification.js></script>
-  <script src=js/asset-manager-new.js></script>
+  <script src=js/asset-manager.js></script>
   <script>
     var loadFile = function(event) {
       var image = document.getElementById('output');

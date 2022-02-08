@@ -7,6 +7,7 @@ var provider;
 var validationStatus;
 var airdropAddressesMode;
 var currentAssetContractAddress;
+var accountHere;
 
 $( document ).ready(function() {
     //const Web3Modal = window.Web3Modal.default;
@@ -91,7 +92,7 @@ $( document ).ready(function() {
     
     }
     
-    init();
+    //init();
       async function onConnect() {
 
           console.log("Opening a dialog", web3Modal);
@@ -123,16 +124,16 @@ $( document ).ready(function() {
           //await refreshAccountData();
         }      
 
-    var accountHere= ""
+    var emailHere= ""
 
-    $.showNotification({
+    /*$.showNotification({
         body:"<h3>" + "Please connect your wallet." + "</h3>",
         duration: 1200,
         maxWidth:"820px",
         shadow:"0 2px 6px rgba(0,0,0,0.2)",
         zIndex: 100,
         margin:"5rem"
-    });
+    });*/
 
     localStorage.setItem('fileName', ''); 
     localStorage.setItem('airdropAddressesFileName', ''); 
@@ -146,7 +147,7 @@ $( document ).ready(function() {
         //onConnect();
         if(accountHere == ""){
             $.showNotification({
-                body:"<h3>" + "File could not be uploaded. Please connect your wallet first and upload again." + "</h3>",
+                body:"<h3>" + "File could not be uploaded. Please sign in first and upload again." + "</h3>",
                 duration: 1200,
                 maxWidth:"820px",
                 shadow:"0 2px 6px rgba(0,0,0,0.2)",
@@ -192,7 +193,7 @@ $( document ).ready(function() {
             console.log(validationStatus);
             if(validationStatus == true){
                 var signedMessage;
-                async function signMessage(){
+                /*async function signMessage(){
                     console.log("signing now");
                     const web3Instance = new Web3(provider);
                     msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("test1"))
@@ -205,7 +206,7 @@ $( document ).ready(function() {
                       })
     
 
-                }
+                }*/
 
                 //signMessage();
           
@@ -286,10 +287,10 @@ $( document ).ready(function() {
         var assetSymbol = $("#assetSymbol").val();
         //var docURL = $("#docURL").val();
         //var description = $("#description").val();
-        if($(".connect-wallet-btn").html() == "Connect Wallet"){
+        if($(".sign-in-btn").html() == "Sign In"){
             validationStatus = false;
             $.showNotification({
-                  body:"<h3>Connect Metamask wallet.</h3>"
+                  body:"<h3>Please Sign In.</h3>"
             })
         }else
         if(localStorage.getItem('fileName') == ''){
@@ -343,6 +344,172 @@ $( document ).ready(function() {
             }
             //}
     }
+      $(".sign-up-btn").click(function(){
+        console.log("sign-up-btn clicked");
+
+        if (!window.indexedDB) {
+          console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+        }
+        $("#signup").show();
+
+      })
+
+    $("#signupsubmitbtn").click(function(){
+        console.log("signupsubmitbtn clicked");
+        var email = $("#useremail").val();
+        var pin = $("#userpin").val();
+        
+
+        //var wallet = new ethers.Wallet("0x11231a28d2f5a7b0237a830e290133232ae1c6d2ab1552dee0fb06d264bcd515");
+        //console.log("Address: " + wallet.address);
+        //var req = indexedDB.deleteDatabase("UserDatabase");
+        var request = window.indexedDB.open("UserDatabase", 1);
+
+        request.onupgradeneeded = function(event) {
+          var db = request.result;
+          var store = db.createObjectStore("User", {keyPath: "email"});
+          var index = store.createIndex("emailIndex", ["email"]);
+        };
+
+        request.onsuccess = function(event) {
+          // Do something with request.result!
+          console.log("success");
+          console.log(event);
+          // Start a new transaction
+            var db = request.result;
+            var tx = db.transaction("User", "readwrite");
+            var store = tx.objectStore("User");
+            console.log(store);
+            //var index = store.index("emailIndex");
+            console.log(email);
+            // Add some data
+            //store.put({"email": "georgesmith9914@gmail.com", "pubAddress": "abc", "pin": "", "privateKey": ""});
+
+            //store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+            
+            // Query the data
+            var getPv = store.get(email);
+
+
+
+            getPv.onsuccess = function() {
+                //console.log(getPv.result);
+                if(getPv.result){
+                    $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
+                }else{
+                    var wallet = ethers.Wallet.createRandom();
+                    console.log("Address: " + wallet.address);
+                    var pubAddress = wallet.address;
+                    var pk = wallet.privateKey;
+                    store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+                    $("#signup").hide();
+                    $.showNotification({
+                      body:"<h3>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h3>"
+                    })
+                }  
+                //$(".sign-up-in-btn").text("Sign out")
+            };
+
+           // Close the db when the transaction is done
+            tx.oncomplete = function() {
+                db.close();
+            };
+        };
+
+        request.onerror = function(event) {
+          // Do something with request.errorCode!
+          console.log("error");
+          console.log(event);
+        };
+    })
+
+    $(".sign-in-btn").click(function(){
+      console.log("sign-in-btn clicked");
+
+      if (!window.indexedDB) {
+        console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
+      }
+      $("#signin").show();
+
+    })
+
+    $("#signinsubmitbtn").click(function(){
+      console.log("signinsubmitbtn clicked");
+      var email = $("#useremailforsignin").val();
+      var pin = $("#userpinforsignin").val();
+      
+
+      //var wallet = new ethers.Wallet("0x11231a28d2f5a7b0237a830e290133232ae1c6d2ab1552dee0fb06d264bcd515");
+      //console.log("Address: " + wallet.address);
+      //var req = indexedDB.deleteDatabase("UserDatabase");
+      var request = window.indexedDB.open("UserDatabase", 1);
+
+      request.onupgradeneeded = function(event) {
+        var db = request.result;
+        var store = db.createObjectStore("User", {keyPath: "email"});
+        var index = store.createIndex("emailIndex", ["email"]);
+      };
+
+      request.onsuccess = function(event) {
+        // Do something with request.result!
+        console.log("success");
+        console.log(event);
+        // Start a new transaction
+          var db = request.result;
+          var tx = db.transaction("User", "readwrite");
+          var store = tx.objectStore("User");
+          console.log(store);
+          //var index = store.index("emailIndex");
+          console.log(email);
+          // Add some data
+          //store.put({"email": "georgesmith9914@gmail.com", "pubAddress": "abc", "pin": "", "privateKey": ""});
+
+          //store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+          
+          // Query the data
+          var getPv = store.get(email);
+
+
+
+          getPv.onsuccess = function() {
+              //console.log(getPv.result);
+              accountHere = getPv.result.pubAddress;
+              console.log(accountHere);
+              emailHere = email;
+              if(getPv.result){
+                if(getPv.result.pin == pin){
+                  $("#signin").hide();
+                  $(".sign-in-btn").text("Sign Out");
+                  $.showNotification({
+                    body:"<h3>Successfully authenticated. Your address is " + getPv.result.pubAddress  +" .</h3>"
+                  })
+
+                  if( window.location.pathname.includes("claim.html")){
+                    loadClaimableAirdrops(getPv.result.pubAddress);
+                  }else if(window.location.pathname.includes("airdrop.html")){
+                    getAssets(getPv.result.pubAddress);
+                  }
+                }
+              }else{
+                $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Invalid email/PIN.</p></div>")
+
+              }  
+              //$(".sign-up-in-btn").text("Sign out")
+          };
+
+         // Close the db when the transaction is done
+          tx.oncomplete = function() {
+              db.close();
+          };
+      };
+
+      request.onerror = function(event) {
+        // Do something with request.errorCode!
+        console.log("error");
+        console.log(event);
+      };
+  })
+
 
     $(".connect-wallet-btn").click(function(){
         console.log("create-asset-connect-wallet-btn clicked");
@@ -500,20 +667,21 @@ $( document ).ready(function() {
             var buttonThis = this;
             //msgHash = web3Instance.utils.sha3(web3Instance.utils.toHex("claimairdrop"), {encoding: "hex"})
             var msg = "I am claiming airdrop.";
-            msgHash = web3Instance.utils.sha3("claimairdrop")
+            //msgHash = web3Instance.utils.sha3("claimairdrop")
             //if (!accountHere) return connect()
-            var sign = "";
+            //var sign = "";
             //web3Instance.eth.personal.sign(msgHash, accountHere, function (err, result) {
-            web3Instance.eth.personal.sign(msg, accountHere, function (err, result) {
-                if (err) return console.error(err)
-                console.log('SIGNED:' + result)
-                sign = result;
+            //web3Instance.eth.personal.sign(msg, accountHere, function (err, result) {
+                //if (err) return console.error(err)
+                //console.log('SIGNED:' + result)
+                //sign = result;
 
                     //Claim airdrop after signing
                     
                     if($( this ).hasClass("disabled") != true){
                         //console.log($( this ).attr("assetcontractaddress"));
-                        if($(".connect-wallet-btn").html() == "Connect Wallet"){
+                        //if($(".connect-wallet-btn").html() == "Connect Wallet"){
+                          if($(".connect-wallet-btn").html() == "Connect Wallet"){
                             validationStatus = false;
                             $.showNotification({
                                 body:"<h3>Connect Metamask wallet.</h3>"
@@ -527,7 +695,7 @@ $( document ).ready(function() {
                                 "assetContractAddress": assetContractAddress,
                                 "ipfsURL": ipfsURL,
                                 "msg": msg,
-                                "sign": sign
+                                "sign": ""
                             }
                             $("#myProgress").show();
                             $(window).scrollTop(0);
@@ -558,7 +726,7 @@ $( document ).ready(function() {
                         }
                     }
 
-              })
+              //})
 
 
         //}
@@ -583,7 +751,7 @@ $( document ).ready(function() {
         const accounts = await web3.eth.getAccounts();
 
         const account = accounts[0];
-        accountHere = account;
+        //accountHere = account;
         console.log(account);
         //alert(account);
         //getAssets(account);
@@ -719,27 +887,86 @@ $( document ).ready(function() {
           contentType: "application/json; charset=utf-8",
           dataType: "json",
           success: async function(data){
-              console.log(data.publicAddress);
-              const ethersProvider = new ethers.providers.JsonRpcProvider("https://rpc-mumbai.maticvigil.com/");
-              console.log(ethersProvider);
-              const ethersSigner = new ethers.Wallet("a8f45b06d108bc5d30f3883979302d46f627d19ac192931049d75c377bf818bf", ethersProvider);
-              console.log(ethersSigner);
-              var balance = await ethersProvider.getBalance("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5")
-              console.log(balance);
-              const mContract = new ethers.Contract(assetContractID, ctrABI.abi, ethersProvider);
-              const mContractWithSigner = mContract.connect(ethersSigner);
-              console.log(mContractWithSigner);
-              var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
-              var tx = mContractWithSigner.approve(data.publicAddress, 1 , gasFeeOptions)
-              console.log("ethers tx");
-              console.log(tx);
-              tx.then(function(value) {
-                  console.log(value);
-                  var tx2 = mContractWithSigner.transferFrom("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5", data.publicAddress, 1 , gasFeeOptions)
-                  tx2.then(function(value) {
-                      console.log(value);
-                  })
-              })
+                var request = window.indexedDB.open("UserDatabase", 1);
+
+                request.onupgradeneeded = function(event) {
+                  var db = request.result;
+                  var store = db.createObjectStore("User", {keyPath: "email"});
+                  var index = store.createIndex("emailIndex", ["email"]);
+                };
+          
+                request.onsuccess = function(event) {
+                  // Do something with request.result!
+                  console.log("success");
+                  console.log(event);
+                  // Start a new transaction
+                    var db = request.result;
+                    var tx = db.transaction("User", "readwrite");
+                    var store = tx.objectStore("User");
+                    console.log(store);
+                    //var index = store.index("emailIndex");
+                    console.log(email);
+                    // Add some data
+                    //store.put({"email": "georgesmith9914@gmail.com", "pubAddress": "abc", "pin": "", "privateKey": ""});
+          
+                    //store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+                    
+                    // Query the data
+                    var getPv = store.get(emailHere);
+          
+          
+          
+                    getPv.onsuccess = function() {
+                        //console.log(getPv.result);
+                        if(getPv.result){
+                          const ethersProvider = new ethers.providers.JsonRpcProvider("https://rpc-mumbai.maticvigil.com/");
+                          console.log(ethersProvider);
+                          const ethersSigner = new ethers.Wallet(getPv.result.privateKey, ethersProvider);
+                          console.log(ethersSigner);
+                          //var balance = await ethersProvider.getBalance("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5")
+                          //console.log(balance);
+                          const mContract = new ethers.Contract(assetContractID, ctrABI.abi, ethersProvider);
+                          const mContractWithSigner = mContract.connect(ethersSigner);
+                          console.log(mContractWithSigner);
+                          var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
+                          var tx = mContractWithSigner.approve(data.publicAddress, 1 , gasFeeOptions)
+                          console.log("ethers tx");
+                          console.log(tx);
+                          tx.then(function(value) {
+                              console.log(value);
+                              var tx2 = mContractWithSigner.transferFrom(getPv.result.pubAddress, data.publicAddress, 1 , gasFeeOptions)
+                              tx2.then(function(value) {
+                                  console.log(value);
+                                  $("#sendnftbyemailmodal").hide();
+                                  $(".modal-backdrop").remove()
+                                  $.showNotification({
+                                    body:"<h3>" + "NFT transferred to : " + data.publicAddress + " via transaction code " + value.hash +  "</h3>",
+                                    duration: 12000,
+                                    maxWidth:"820px",
+                                    shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                                    zIndex: 100,
+                                    margin:"1rem"
+                                });
+                              })
+                          })
+                        }else{
+
+                        }  
+                        //$(".sign-up-in-btn").text("Sign out")
+                    };
+          
+                  // Close the db when the transaction is done
+                    tx.oncomplete = function() {
+                        db.close();
+                    };
+                };
+          
+                request.onerror = function(event) {
+                  // Do something with request.errorCode!
+                  console.log("error");
+                  console.log(event);
+                };
+ 
 
               /*$.showNotification({
                   body:"<h3>" + "Asset created successfully with NFT contract address: " + data.contractAddress + "</h3>",
