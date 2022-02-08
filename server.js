@@ -1277,6 +1277,49 @@ app.post('/findpublicaddressbyemail', async (req, res) => {
      
 });
 
+app.post('/requestvercode', async (req, res) => {
+    console.log(req.body.email);
+    res.json({"message":"verification code being sent on email"})
+    //Now send the verification code on email
+    var verificationCode = Math.floor(100000 + Math.random() * 900000);
+    //Save code in Mongo
+    await client.connect();
+    console.log('Connected successfully to mongo server');
+    const db = client.db(dbName);
+    const collection = db.collection('vercodes');
+    const query = { email: req.body.email };
+    const update = { $set: { email: req.body.email, verificationCode: verificationCode }};
+    const options = { upsert: true };
+    const upsertResult = await collection.updateOne(query, update, options);
+
+    console.log('upserted documents =>', upsertResult);
+
+    //Send code on email to user
+    fs.readFile('credentials.json', (err, content) => {
+        console.log(JSON.parse(content));
+        if (err) return console.log('Error loading client secret file:', err);
+        // Authorize a client with credentials, then call the Gmail API.
+        authorize(JSON.parse(content), req.body.email, verificationCode, sendMessageForVerificationCode);
+    });
+});
+
+app.post('/checkvercode', async (req, res) => {
+    console.log(req.body.email);
+    
+    //Check code from Mongo
+    await client.connect();
+    console.log('Connected successfully to mongo server');
+    const db = client.db(dbName);
+    const collection = db.collection('vercodes');
+    result = await collection.find({email: req.body.email}).toArray();
+    console.log(result[0].verificationCode);
+    if(result[0].verificationCode == req.body.code){
+        res.json({"message":"success"})
+    }else{
+        res.json({"message":"failure"})
+    }
+});
+
 app.post('/movetokentosent', async (req, res) => {
     console.log(req.body);
 
@@ -1329,7 +1372,7 @@ const TOKEN_PATH = 'token.json';
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials, to, verificationCode, callback) {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
@@ -1338,7 +1381,7 @@ function authorize(credentials, callback) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getNewToken(oAuth2Client, callback);
     oAuth2Client.setCredentials(JSON.parse(token));
-    callback(oAuth2Client);
+    callback(oAuth2Client, to, verificationCode);
   });
 }
 
@@ -1573,8 +1616,39 @@ function watchEmail(auth){
         return encodedMail; 
     }
 
-  function sendMessage(to, auth, contractAddress) {
-    var raw = makeBody(to, 'NFT asset created successfully on Monaliza', contractAddress);
+    function sendMessage(to, auth, contractAddress) {
+        var raw = makeBody(to, 'NFT asset created successfully on Monaliza', contractAddress);
+        const gmail = google.gmail({version: 'v1', auth});
+        gmail.users.messages.send({
+            auth: auth,
+            userId: 'me',
+            resource: {
+                raw: raw
+            }
+        
+        }, function(err, response) {
+            console.log(err);
+            return(err || response)
+        });
+    }
+
+    function makeBodyForVerificationCode(to, subject, verificationCode) {
+            var message = "Your Monaliza sign-in verification code is " + verificationCode + " .";
+            var email =
+            "From: 'me'\r\n" +
+            "To: " + to + "\r\n" +
+            "Subject: " + subject + "\r\n" +
+            "Content-Type: text/html; charset='UTF-8'\r\n" +
+            "Content-Transfer-Encoding: base64\r\n\r\n" +
+            "<html><body>" +
+            message +
+            "</body></html>";
+            var encodedMail = new Buffer(email).toString("base64").replace(/\+/g, '-').replace(/\//g, '_');
+            return encodedMail; 
+        }
+
+  function sendMessageForVerificationCode(auth, to, verificationCode) {
+    var raw = makeBodyForVerificationCode(to, 'Your Monaliza Sign-In Verification Code', verificationCode);
     const gmail = google.gmail({version: 'v1', auth});
     gmail.users.messages.send({
         auth: auth,

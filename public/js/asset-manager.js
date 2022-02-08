@@ -433,6 +433,33 @@ $( document ).ready(function() {
 
     })
 
+    $("#requestvercode").click(function(){
+      var email = $("#useremailforsignin").val();
+      var data = {email: email}
+      $.ajax( {
+        url: '/requestvercode',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(result){
+            console.log(result);
+            if(result){
+                $.showNotification({
+                  body:"<h3>Verification code is being sent. Please check your email.</h3>",
+                  zIndex: 1051,
+                  direction: "prepend"
+              })
+            }else {
+                $.showNotification({
+                      body:"<h3>Verification code could not be sent. Please try again.</h3>"
+                })
+            }
+        }
+      } );
+
+    })
+
     $("#signinsubmitbtn").click(function(){
       console.log("signinsubmitbtn clicked");
       var email = $("#useremailforsignin").val();
@@ -476,19 +503,42 @@ $( document ).ready(function() {
               accountHere = getPv.result.pubAddress;
               console.log(accountHere);
               emailHere = email;
+              var code = $("#vercodeforsignin").val();
               if(getPv.result){
                 if(getPv.result.pin == pin){
-                  $("#signin").hide();
-                  $(".sign-in-btn").text("Sign Out");
-                  $.showNotification({
-                    body:"<h3>Successfully authenticated. Your address is " + getPv.result.pubAddress  +" .</h3>"
-                  })
+                  var data = {}
+                  data.email = email;
+                  data.code = code;
 
-                  if( window.location.pathname.includes("claim.html")){
-                    loadClaimableAirdrops(getPv.result.pubAddress);
-                  }else if(window.location.pathname.includes("airdrop.html")){
-                    getAssets(getPv.result.pubAddress);
-                  }
+                  $.ajax( {
+                    url: '/checkvercode',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(result){
+                        console.log(result);
+                        if(result.message == "success"){
+                          $("#signin").hide();
+                          $(".sign-in-btn").text("Sign Out");
+                          $.showNotification({
+                            body:"<h3>Successfully authenticated. Your address is " + getPv.result.pubAddress  +" .</h3>"
+                          })
+        
+                          if( window.location.pathname.includes("claim.html")){
+                            loadClaimableAirdrops(getPv.result.pubAddress);
+                          }else if(window.location.pathname.includes("airdrop.html")){
+                            getAssets(getPv.result.pubAddress);
+                          }
+                        }else {
+                            $.showNotification({
+                                  body:"<h3>Authentication failed.</h3>",
+                                  zIndex: 1151
+                            })
+                        }
+                    }
+                  } );
+
                 }
               }else{
                 $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Invalid email/PIN.</p></div>")
