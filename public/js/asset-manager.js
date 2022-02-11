@@ -460,6 +460,33 @@ $( document ).ready(function() {
 
     })
 
+    $("#requestvercodeforexport").click(function(){
+      var email = $("#useremailforexport").val();
+      var data = {email: email}
+      $.ajax( {
+        url: '/requestvercode',
+        type: 'POST',
+        data: JSON.stringify(data),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function(result){
+            console.log(result);
+            if(result){
+                $.showNotification({
+                  body:"<h3>Verification code is being sent. Please check your email.</h3>",
+                  zIndex: 1051,
+                  direction: "prepend"
+              })
+            }else {
+                $.showNotification({
+                      body:"<h3>Verification code could not be sent. Please try again.</h3>"
+                })
+            }
+        }
+      } );
+
+    })    
+
     $("#signinsubmitbtn").click(function(){
       console.log("signinsubmitbtn clicked");
       var email = $("#useremailforsignin").val();
@@ -500,6 +527,7 @@ $( document ).ready(function() {
 
           getPv.onsuccess = function() {
               //console.log(getPv.result);
+              $("#exportwallet").css("visibility", "visible");
               accountHere = getPv.result.pubAddress;
               console.log(accountHere);
               emailHere = email;
@@ -520,6 +548,7 @@ $( document ).ready(function() {
                         console.log(result);
                         if(result.message == "success"){
                           $("#signin").hide();
+                          //$("#signin").css("display", "none");
                           $(".sign-in-btn").text("Sign Out");
                           $.showNotification({
                             body:"<h3>Successfully authenticated. Your address is " + getPv.result.pubAddress  +" .</h3>"
@@ -560,6 +589,123 @@ $( document ).ready(function() {
       };
   })
 
+  $("#exportwallet").click(function(){
+    console.log("exportwallet clicked");
+    if(! accountHere) {
+      //Do nothing as user not logged in
+      return;
+    }else{
+      $("#exportwalletmodal").show();
+    }
+  })
+
+  $("#exportwalletsubmitbtn").click(function(){
+    console.log("exportwalletsubmitbtn clicked");
+    if(! accountHere) {
+      //Do nothing as user not logged in
+      return;
+    }else{
+      var email = $("#useremailforexport").val();
+      var pin = $("#userpinforexport").val();
+      
+
+      //var wallet = new ethers.Wallet("0x11231a28d2f5a7b0237a830e290133232ae1c6d2ab1552dee0fb06d264bcd515");
+      //console.log("Address: " + wallet.address);
+      //var req = indexedDB.deleteDatabase("UserDatabase");
+      var request = window.indexedDB.open("UserDatabase", 1);
+
+      request.onupgradeneeded = function(event) {
+        var db = request.result;
+        var store = db.createObjectStore("User", {keyPath: "email"});
+        var index = store.createIndex("emailIndex", ["email"]);
+      };
+
+      request.onsuccess = function(event) {
+        // Do something with request.result!
+        console.log("success");
+        console.log(event);
+        // Start a new transaction
+          var db = request.result;
+          var tx = db.transaction("User", "readwrite");
+          var store = tx.objectStore("User");
+          console.log(store);
+          //var index = store.index("emailIndex");
+          console.log(email);
+          // Add some data
+          //store.put({"email": "georgesmith9914@gmail.com", "pubAddress": "abc", "pin": "", "privateKey": ""});
+
+          //store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+          
+          // Query the data
+          var getPv = store.get(email);
+
+
+
+          getPv.onsuccess = function() {
+              //console.log(getPv.result);
+              $("#exportwallet").css("visibility", "visible");
+              accountHere = getPv.result.pubAddress;
+              console.log(accountHere);
+              emailHere = email;
+              var code = $("#vercodeforexport").val();
+              if(getPv.result){
+                if(getPv.result.pin == pin){
+                  var data = {}
+                  data.email = email;
+                  data.code = code;
+
+                  $.ajax( {
+                    url: '/checkvercode',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function(result){
+                        console.log(result);
+                        if(result.message == "success"){
+                          //$("#signin").hide();
+                          //$(".sign-in-btn").text("Sign Out");
+                          $.showNotification({
+                            body:"<h3>Successfully authenticated. Your address is " + getPv.result.pubAddress  +" .</h3>",
+                            zIndex: 1051
+                          })
+        
+                          
+                          $("#labelexportwalletpk").css("display", "block");
+                          $("#exportwalletpk").css("display", "block");
+                          $("#exportwalletpk").val(getPv.result.privateKey);
+                        }else {
+                            $.showNotification({
+                                  body:"<h3>Authentication failed.</h3>",
+                                  zIndex: 1051
+                            })
+                        }
+                    }
+                  } );
+
+                }
+              }else{
+                $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Invalid email/PIN.</p></div>")
+
+              }  
+              //$(".sign-up-in-btn").text("Sign out")
+          };
+
+         // Close the db when the transaction is done
+          tx.oncomplete = function() {
+              db.close();
+          };
+      };
+
+      request.onerror = function(event) {
+        // Do something with request.errorCode!
+        console.log("error");
+        console.log(event);
+      };      
+
+    }
+  })
+  
 
     $(".connect-wallet-btn").click(function(){
         console.log("create-asset-connect-wallet-btn clicked");
