@@ -136,6 +136,7 @@ const express = require("express");
 require('dotenv').config();
 var cors = require('cors')
 
+
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 const monaLizaContract = require("./build/contracts/Monaliza.json")
 
@@ -143,6 +144,7 @@ var monalizaFactoryContractAddress = "0x92AF1a042a0f15111e367a2E9d3F73569997b6aE
 var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
 
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
+
 
 async function testhh(){
     //const Token = await ethers.getContractFactory("Token");
@@ -289,7 +291,15 @@ var imgPath = './dunst.jpg';
 Monaliza.deployed().then(function(instance) {
     monalizaInstance = instance;
 })*/
-
+app.get('/api', function(req, res){ 
+    request("https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai", function (error, response, body) { 
+      if (!error && response.statusCode === 200) { 
+        console.log(body); 
+        res.send(body); 
+      } 
+     }); 
+  });
+  
 app.post('/createairdrop', (req, res, next) => {
     console.log("Starting to createairdrop");
     console.log(req.body);
