@@ -292,7 +292,10 @@ var imgPath = './dunst.jpg';
 Monaliza.deployed().then(function(instance) {
     monalizaInstance = instance;
 })*/
-app.use('/api', proxy('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'));
+//app.use('/api', proxy('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'));
+var apiProxy = proxy('/api', {target: 'https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'});
+app.use(apiProxy)
+
 
 app.post('/createairdrop', (req, res, next) => {
     console.log("Starting to createairdrop");
