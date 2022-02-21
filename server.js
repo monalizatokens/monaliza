@@ -139,7 +139,7 @@ var cors = require('cors')
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 const monaLizaContract = require("./build/contracts/Monaliza.json")
 
-var monalizaFactoryContractAddress = "0x0c7c0aa1c4c2a2b4e3a01f4b16106117c9e1ef90";
+var monalizaFactoryContractAddress = "0x92AF1a042a0f15111e367a2E9d3F73569997b6aE";
 var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
 
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
@@ -950,7 +950,8 @@ app.post('/claimairdrop', async (req, res) => {
         const Monaliza = await ethers.getContractFactory('Monaliza');
         //console.log(MonalizaFactory);
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
-        const monaliza = await Monaliza.attach(monalizaContractAddress);
+        const monaliza = await Monaliza.attach(req.body.assetContractAddress);
+        //const monaliza = await Monaliza.attach(monalizaContractAddress);
         //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
         var options = { nonce: newNonce};
 
@@ -1269,7 +1270,7 @@ app.get('/assetsforuseraddress', async function (req, res) {
 
 app.post('/findpublicaddressbyemail', async (req, res) => {
      console.log(req.body);
-     if(req.body.email == "sanjeevkumar761@gmail.com"){
+     if(req.body.email == "georgesmith9914@gmail.com"){
         res.json({"publicAddress": "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", "email": "georgesmith9914@gmail.com"})
      }else if(req.body.email == "aina.fournier@gmail.com"){
         res.json({"publicAddress": "0xCd04943Ef3D7250603927d4038a88Bb15342b7A5", "email": "aina.fournier@gmail.com"})

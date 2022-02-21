@@ -19,6 +19,8 @@
   "homepage": "https://github.com/monalizatokens/monaliza#readme",
   "dependencies": {
     "@metamask/eth-sig-util": "^4.0.0",
+    "@opengsn/contracts": "^2.2.6",
+    "@opengsn/provider": "^2.2.6",
     "@openzeppelin/contracts": "^4.4.0",
     "@pinata/sdk": "^1.1.23",
     "@truffle/abi-utils": "^0.2.3",
@@ -41,9 +43,11 @@
     "openzeppelin-solidity": "^3.4.0",
     "request": "^2.88.2",
     "simple-thumbnail": "^1.6.5",
+    "tabookey-gasless": "^0.4.5",
     "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.6.1",
-    "web3-hdwallet-provider": "^1.0.4-fix2"
+    "web3-hdwallet-provider": "^1.0.4-fix2",
+    "web3-providers-http": "^1.7.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.3",

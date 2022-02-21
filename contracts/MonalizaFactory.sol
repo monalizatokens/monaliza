@@ -1,25 +1,25 @@
 pragma solidity ^0.8.0;
 
 import "./ERC721Tradable.sol";
-
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 /**
  * @title Monaliza
  * Monaliza - the contract for non-fungible Monaliza NFTs.
  */
-contract Monaliza is ERC721Tradable {
+contract Monaliza is ERC721Tradable  {
     //using Counters for Counters.Counter;
     //Counters.Counter private _tokenIds;
     string private _localBaseURI;
     mapping (uint256 => string) private _tokenURIs;
     //mapping (uint256 => string) private _tokenURIs;
     mapping (address => bool) public allowedAddresses;
-
-
+ 
     constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress)
         ERC721Tradable(tokenName, symbol, _proxyRegistryAddress)
     {
         
     }
+
 
     function setAddressesAllowedForMinting(address[] memory addressesAllowedForMinting) public virtual {
         //require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
@@ -59,7 +59,7 @@ contract Monaliza is ERC721Tradable {
     
 }
 
-contract MonalizaFactory {
+contract MonalizaFactory is BaseRelayRecipient {
     address[] public contracts;
     address public lastContractAddress; 
     //uint256 public lastTokenID; 
@@ -69,10 +69,13 @@ contract MonalizaFactory {
     event AddAirDrop(address tokenAddress); 
     event TransferToken(Monaliza tokenAddress, address toAddress, uint256 tokenId);
     address owner;
+    string public override versionRecipient = "2.2.0";
 
-    constructor() public{
+    constructor(address forwarder) public{
       owner = msg.sender;
+      _setTrustedForwarder(forwarder); 
     }   
+
 
     function getContractCount() public view returns(uint contractCount) {
         return contracts.length;
@@ -118,6 +121,7 @@ contract MonalizaFactory {
 
     function transferToken(Monaliza tokenAddress, address from, address to, uint256 tokenID) public returns(uint256 newItemId) {
         //require(msg.sender == tokenAddress.owner());
+        tokenAddress.approve(to, tokenID);
         tokenAddress.safeTransferFrom(from, to, tokenID);
         emit TransferToken(tokenAddress, to, tokenID);
         return tokenID;
