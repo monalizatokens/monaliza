@@ -1122,7 +1122,7 @@ $( document ).ready(function() {
                     getPv.onsuccess = async function() {
                         //console.log(getPv.result);
                         if(getPv.result){
-                          const web3provider = new Web3HttpProvider('https://cors-anywhere.herokuapp.com/https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai')
+                          const web3provider = new Web3HttpProvider('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai')
                           const config = {
                             // loggerConfiguration: { logLevel: 'error'},
                             paymasterAddress: "0xcA94aBEdcC18A10521aB7273B3F3D5ED28Cf7B8A"
