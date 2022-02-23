@@ -1170,7 +1170,7 @@ $( document ).ready(function() {
                           console.log(receipt);
                           $.showNotification({
                             body:"<h3>" + "NFT Transfer done with tx hash" + tx2.hash + "</h3>",
-                            duration: 1200,
+                            duration: 10200,
                             maxWidth:"820px",
                             shadow:"0 2px 6px rgba(0,0,0,0.2)",
                             zIndex: 100,
