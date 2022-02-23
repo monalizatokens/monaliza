@@ -1152,10 +1152,10 @@ $( document ).ready(function() {
                           /*tx.then(function(value) {
                             console.log(value);
                           })*/
-                          $("#sendnftbyemailmodal").hide();
+                          $("#sendnftbyemailmodal").modal('hide');
                           $.showNotification({
                             body:"<h3>" + "NFT Transfer in progress. We´ll update you shortly" + "</h3>",
-                            duration: 1200,
+                            duration: 5200,
                             maxWidth:"820px",
                             shadow:"0 2px 6px rgba(0,0,0,0.2)",
                             zIndex: 100,
