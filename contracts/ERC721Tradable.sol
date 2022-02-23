@@ -93,6 +93,7 @@ abstract contract ERC721Tradable is ERC721, ContextMixin, NativeMetaTransaction,
     function _msgSender()
         internal
         override
+        virtual
         view
         returns (address sender)
     {

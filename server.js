@@ -9,7 +9,7 @@ let MonalizaNFTArtifact = require("./build/contracts/Monaliza.json");
 
 //const HDWalletProvider = require("@truffle/hdwallet-provider");
 const bodyParser = require('body-parser')
-const request = require('request');
+const request = require('request').defaults({rejectUnauthorized:false});
 const https = require('https');
 const pinataSDK = require('@pinata/sdk');
 const morgan = require('morgan');
@@ -43,7 +43,7 @@ const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
 var proxy = require('express-http-proxy');
-
+var httpProxy = require('http-proxy');
 
 /*async function main() {
     // Use connect method to connect to the server
@@ -76,6 +76,7 @@ var allAssets = [];
           fs.readFileSync('./certs/USERTrustRSAAAACA.crt')
        ]
   };
+
 
 
 /*console.log(db.get('assets'));*/
@@ -141,7 +142,7 @@ var cors = require('cors')
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 const monaLizaContract = require("./build/contracts/Monaliza.json")
 
-var monalizaFactoryContractAddress = "0x92AF1a042a0f15111e367a2E9d3F73569997b6aE";
+var monalizaFactoryContractAddress = "0x8c9C11fB2Bf1A1f17062d96593b37B112a0Ab58d";
 var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
 
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
@@ -222,8 +223,16 @@ async function testhh(){
 //testhh()
 
 
-
 const app = express();
+var apiProxy = httpProxy.createProxyServer({ssl: options});
+var backend = 'https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'
+app.all("/api/*", function(req, res) {
+    apiProxy.web(req, res, {target: backend});
+  });
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const exampleProxy = createProxyMiddleware({target: "https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai"});
+app.use('/api2', exampleProxy);
+
 const httpsServer = https.createServer(options, app)
 const port = 443;
 
@@ -293,8 +302,7 @@ Monaliza.deployed().then(function(instance) {
     monalizaInstance = instance;
 })*/
 //app.use('/api', proxy('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'));
-var apiProxy = proxy('/api', {target: 'https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'});
-app.use(apiProxy)
+
 
 
 app.post('/createairdrop', (req, res, next) => {
@@ -538,11 +546,21 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
         var name = req.body.assetName;
         var symbol = req.body.assetSymbol;
         var fileName = req.body.fileName;
-        console.log(name + " " + symbol);
+        //console.log(name + " " + symbol);
         const MonalizaFactory = await ethers.getContractFactory('MonalizaFactory');
         //console.log(MonalizaFactory);
         const monalizaFactory = await MonalizaFactory.attach(monalizaFactoryContractAddress);
-        var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress);
+        var gasFeeOptions = {gasLimit: 2100000, gasPrice: 8000000000}
+        //Remove it
+        /*var sendPromise = await monalizaFactory.transferToken("0x410aD3b990Bf47578046dCdEFA5e11208A74441b", "0xEdB9535F3689cfedE4a309455fC33C9A7367F87D", "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
+          console.log(sendPromise);
+        sendPromise.then(function(value) {
+          console.log(value);
+        })*/
+        //
+        var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress, "0x4d4581c01A457925410cd3877d17b2fd4553b2C5");
+        //var sendPromise = await monalizaFactory.deployNFTContract("AAA", "AAAA", "0xEdB9535F3689cfedE4a309455fC33C9A7367F87D");
+        console.log(sendPromise);
         /*sendPromise.then(function(transaction){
             console.log(transaction);
         });*/
@@ -975,6 +993,10 @@ app.post('/claimairdrop', async (req, res) => {
             var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
             console.log(tokenIDObtained);
             console.log("token ID from fn call is " + tokenIDObtained.toString());
+            //var tx =  await monaliza.setApprovalForAll("0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", true, gasFeeOptions);
+            //console.log(tx);
+            //var status = await monaliza.isApprovedForAll("0xEdB9535F3689cfedE4a309455fC33C9A7367F87D","0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", gasFeeOptions)
+            //console.log(status);
             /*var sendPromise = await monaliza.approve("0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
             console.log(sendPromise);
             var sendPromise2 = await monaliza.transferFrom("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5", "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)

@@ -6,20 +6,30 @@ import "@opengsn/contracts/src/BaseRelayRecipient.sol";
  * @title Monaliza
  * Monaliza - the contract for non-fungible Monaliza NFTs.
  */
-contract Monaliza is ERC721Tradable  {
+contract Monaliza is BaseRelayRecipient, ERC721Tradable {
     //using Counters for Counters.Counter;
     //Counters.Counter private _tokenIds;
     string private _localBaseURI;
     mapping (uint256 => string) private _tokenURIs;
     //mapping (uint256 => string) private _tokenURIs;
     mapping (address => bool) public allowedAddresses;
- 
-    constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress)
+     string public override versionRecipient = "2.2.0";
+     
+     constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress, address forwarder)
         ERC721Tradable(tokenName, symbol, _proxyRegistryAddress)
     {
-        
+        _setTrustedForwarder(forwarder); 
     }
 
+          
+
+    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+        return BaseRelayRecipient._msgData();
+    }
+
+    function _msgSender() internal view override(ERC721Tradable, BaseRelayRecipient) returns (address ret) {
+        return BaseRelayRecipient._msgSender();
+    }
 
     function setAddressesAllowedForMinting(address[] memory addressesAllowedForMinting) public virtual {
         //require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
@@ -59,7 +69,7 @@ contract Monaliza is ERC721Tradable  {
     
 }
 
-contract MonalizaFactory is BaseRelayRecipient {
+contract MonalizaFactory {
     address[] public contracts;
     address public lastContractAddress; 
     //uint256 public lastTokenID; 
@@ -69,11 +79,9 @@ contract MonalizaFactory is BaseRelayRecipient {
     event AddAirDrop(address tokenAddress); 
     event TransferToken(Monaliza tokenAddress, address toAddress, uint256 tokenId);
     address owner;
-    string public override versionRecipient = "2.2.0";
 
-    constructor(address forwarder) public{
+    constructor() public{
       owner = msg.sender;
-      _setTrustedForwarder(forwarder); 
     }   
 
 
@@ -85,8 +93,8 @@ contract MonalizaFactory is BaseRelayRecipient {
         return lastContractAddress;
     }
 
-    function deployNFTContract(string memory name, string memory symbol, address registryAddress) public returns(address newContract){
-         Monaliza c = new Monaliza(name, symbol, registryAddress);
+    function deployNFTContract(string memory name, string memory symbol, address registryAddress, address forwarder) public returns(address newContract){
+         Monaliza c = new Monaliza(name, symbol, registryAddress, forwarder);
          //c.setLocalBaseURI(baseURI);
          address cAddr = address(c);
          contracts.push(cAddr);
@@ -121,7 +129,7 @@ contract MonalizaFactory is BaseRelayRecipient {
 
     function transferToken(Monaliza tokenAddress, address from, address to, uint256 tokenID) public returns(uint256 newItemId) {
         //require(msg.sender == tokenAddress.owner());
-        tokenAddress.approve(to, tokenID);
+        //tokenAddress.approve(to, tokenID);
         tokenAddress.safeTransferFrom(from, to, tokenID);
         emit TransferToken(tokenAddress, to, tokenID);
         return tokenID;
