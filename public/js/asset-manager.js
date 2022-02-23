@@ -1152,12 +1152,30 @@ $( document ).ready(function() {
                           /*tx.then(function(value) {
                             console.log(value);
                           })*/
+                          $("sendnftbyemailmodal").hide();
+                          $.showNotification({
+                            body:"<h3>" + "NFT Transfer in progress. We´ll update you shortly" + "</h3>",
+                            duration: 1200,
+                            maxWidth:"820px",
+                            shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                            zIndex: 100,
+                            margin:"5rem"
+                        });
+
                           var tx1 = await mContractWithSigner.approve(data.publicAddress, 1);
                           var tx2 = await mContractWithSigner.transferFrom(getPv.result.pubAddress, data.publicAddress, 1)
                           console.log(tx2);
                           logger.debug();
                           const receipt = await tx2.wait();
                           console.log(receipt);
+                          $.showNotification({
+                            body:"<h3>" + "NFT Transfer done with tx hash" + tx2.hash + "</h3>",
+                            duration: 1200,
+                            maxWidth:"820px",
+                            shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                            zIndex: 100,
+                            margin:"5rem"
+                        });
                           /*var tx = await mContractWithSigner.transferToken(assetContractID, getPv.result.pubAddress, data.publicAddress, 1 , gasFeeOptions)
                           console.log(tx);
                           logger.debug();
