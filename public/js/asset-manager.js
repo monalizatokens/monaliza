@@ -894,7 +894,8 @@ $( document ).ready(function() {
                             console.log("came in else");
                             $(buttonThis).prop('disabled', true);
                             var claimData = {
-                                "userAddress": accountHere,
+                                "userAddress": emailHere,
+                                "pubAddress": accountHere,
                                 "assetContractAddress": assetContractAddress,
                                 "ipfsURL": ipfsURL,
                                 "msg": msg,
@@ -982,7 +983,8 @@ $( document ).ready(function() {
     function loadClaimableAirdrops(account){
        // alert("loadClaimableAirdrops");
        if($(location).attr('href').includes("claim")){
-            $.ajax({url: "/getairdropsforuser?useraddress=" + account, success: function(result){
+            //$.ajax({url: "/getairdropsforuser?useraddress=" + account, success: function(result){
+              $.ajax({url: "/getairdropsforuser?useraddress=" + emailHere, success: function(result){
                 console.log(result);
                 airdrops = result.reverse();
                 //var listContainer = $('#assetList');  
