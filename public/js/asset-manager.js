@@ -369,18 +369,26 @@ $( document ).ready(function() {
         //var wallet = new ethers.Wallet("0x11231a28d2f5a7b0237a830e290133232ae1c6d2ab1552dee0fb06d264bcd515");
         //console.log("Address: " + wallet.address);
         //var req = indexedDB.deleteDatabase("UserDatabase");
+        //var request = window.indexedDB.deleteDatabase("UserDatabase", 1);
         var request = window.indexedDB.open("UserDatabase", 1);
 
         request.onupgradeneeded = function(event) {
           var db = request.result;
-          var store = db.createObjectStore("User", {keyPath: "email"});
-          var index = store.createIndex("emailIndex", ["email"]);
+          //try{
+            var store = db.createObjectStore("User", {keyPath: "email"});
+            var index = store.createIndex("emailIndex", ["email"]);
+          //}catch(e){
+          //  console.log(e);
+          //}
         };
 
         request.onsuccess = function(event) {
           // Do something with request.result!
           console.log("success");
           console.log(event);
+          //var db = request.result;
+          //var store = db.createObjectStore("User", {keyPath: "email"});
+          //var index = store.createIndex("emailIndex", ["email"]);
           // Start a new transaction
             var db = request.result;
             var tx = db.transaction("User", "readwrite");
@@ -399,7 +407,7 @@ $( document ).ready(function() {
 
 
             getPv.onsuccess = function() {
-                //console.log(getPv.result);
+                console.log(getPv.result);
                 if(getPv.result){
                     $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
                 }else{
@@ -407,11 +415,30 @@ $( document ).ready(function() {
                     console.log("Address: " + wallet.address);
                     var pubAddress = wallet.address;
                     var pk = wallet.privateKey;
+                    var data = {email: email, pubAddress: wallet.address}
                     store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
-                    $("#signup").hide();
-                    $.showNotification({
-                      body:"<h3>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h3>"
-                    })
+                    $.ajax( {
+                      url: '/saveuseremailpubaddress',
+                      type: 'POST',
+                      data: JSON.stringify(data),
+                      contentType: "application/json; charset=utf-8",
+                      dataType: "json",
+                      success: function(result){
+                          console.log(result);
+                          if(result.message == "success"){
+                            $("#signup").hide();
+                            $.showNotification({
+                              body:"<h3>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h3>"
+                            })
+                          }else if(result.message == "failure"){
+                            $.showNotification({
+                              body:"<h3>Failed to sign up. Please try again.</h3>"
+                            })
+                          }
+                      }
+                    } );                    
+
+
                 }  
                 //$(".sign-up-in-btn").text("Sign out")
             };
@@ -1164,8 +1191,10 @@ $( document ).ready(function() {
                             margin:"5rem"
                         });
 
-                          var tx1 = await mContractWithSigner.approve(data.publicAddress, 1);
-                          var tx2 = await mContractWithSigner.transferFrom(getPv.result.pubAddress, data.publicAddress, 1)
+                          var tx1 = await mContractWithSigner.approve(data.publicAddress, 1, gasFeeOptions);
+                          console.log(getPv.result.pubAddress);
+                          console.log(data.publicAddress);
+                          var tx2 = await mContractWithSigner.transferFrom(getPv.result.pubAddress, data.publicAddress, 1, gasFeeOptions)
                           console.log(tx2);
                           logger.debug();
                           const receipt = await tx2.wait();

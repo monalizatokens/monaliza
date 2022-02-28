@@ -303,7 +303,28 @@ Monaliza.deployed().then(function(instance) {
 })*/
 //app.use('/api', proxy('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'));
 
+app.post('/saveuseremailpubaddress', async (req, res, next) => {
+    console.log("Starting to saveuserpubaddress");
+    console.log(req.body);
+    try{
+        await client.connect();
+        console.log('Connected successfully to mongo server');
+        const db = client.db(dbName);
+        const collection = db.collection('useremailpubaddress');
 
+        const insertResult = await collection.insertOne({
+            "userEmail": req.body.email,
+            "userPublicAddress": req.body.pubAddress
+        });
+        console.log('Inserted documents =>', insertResult);
+        res.json({"message": "success"})
+    }catch(e){
+        console.log(e);
+        res.json({"message": "failure"})
+    }finally{
+        client.close();
+    }    
+})
 
 app.post('/createairdrop', (req, res, next) => {
     console.log("Starting to createairdrop");
@@ -1301,11 +1322,17 @@ app.get('/assetsforuseraddress', async function (req, res) {
 })
 
 app.post('/findpublicaddressbyemail', async (req, res) => {
-     console.log(req.body);
-     if(req.body.email == "georgesmith9914@gmail.com"){
-        res.json({"publicAddress": "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", "email": "georgesmith9914@gmail.com"})
-     }else if(req.body.email == "aina.fournier@gmail.com"){
-        res.json({"publicAddress": "0xCd04943Ef3D7250603927d4038a88Bb15342b7A5", "email": "aina.fournier@gmail.com"})
+     console.log(req.body.email);
+     await client.connect();
+     console.log('Connected successfully to mongo server');
+     const db = client.db(dbName);
+     const collection = db.collection('useremailpubaddress');
+     result = await collection.find({userEmail: req.body.email}).toArray();
+     console.log(result);
+     if(result[0].userPublicAddress){
+         res.json({"publicAddress":result[0].userPublicAddress})
+     }else{
+         res.json({"message":"failure"})
      }
      
 });
