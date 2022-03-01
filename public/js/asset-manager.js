@@ -365,6 +365,31 @@ $( document ).ready(function() {
         var email = $("#useremail").val();
         var pin = $("#userpin").val();
         
+        function isEmail(email) {
+          var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+          return regex.test(email);
+        }
+
+        function isPin(pin) {
+          var regex = /^[0-9]{1,6}$/;
+          return regex.test(pin);
+        }
+
+        if(!isEmail(email)){
+          $.showNotification({
+            body:"<h3>Please enter email in correct format.</h3>",
+            zIndex: 1051,
+            direction: "prepend"
+          })
+          return;
+        }else if(!isPin(pin)){
+          $.showNotification({
+            body:"<h3>Please enter 6 digit PIN.</h3>",
+            zIndex: 1051,
+            direction: "prepend"
+          })
+          return;
+        }
 
         //var wallet = new ethers.Wallet("0x11231a28d2f5a7b0237a830e290133232ae1c6d2ab1552dee0fb06d264bcd515");
         //console.log("Address: " + wallet.address);

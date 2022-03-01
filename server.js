@@ -1348,7 +1348,7 @@ app.post('/requestvercode', async (req, res) => {
     const db = client.db(dbName);
     const collection = db.collection('vercodes');
     const query = { email: req.body.email };
-    const update = { $set: { email: req.body.email, verificationCode: verificationCode }};
+    const update = { $set: { email: req.body.email, verificationCode: verificationCode, updatedAt: {type:Date, default:Date.now() }}};
     const options = { upsert: true };
     const upsertResult = await collection.updateOne(query, update, options);
 
@@ -1373,7 +1373,10 @@ app.post('/checkvercode', async (req, res) => {
     const collection = db.collection('vercodes');
     result = await collection.find({email: req.body.email}).toArray();
     console.log(result[0].verificationCode);
-    if(result[0].verificationCode == req.body.code){
+    console.log(result[0].updatedAt.default);
+    console.log(new Date().valueOf());
+    console.log(parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000)
+    if(result[0].verificationCode == req.body.code && (parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000 < 121)){
         res.json({"message":"success"})
     }else{
         res.json({"message":"failure"})
