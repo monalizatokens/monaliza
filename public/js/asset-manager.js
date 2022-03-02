@@ -15,6 +15,11 @@ console.log(RelayProvider)
 const Web3HttpProvider = require("web3-providers-http");
 console.log(Web3HttpProvider)
 
+function isEmail(email) {
+  var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+  return regex.test(email);
+}
+
 $( document ).ready(function() {
     //const Web3Modal = window.Web3Modal.default;
     "use strict";
@@ -365,10 +370,7 @@ $( document ).ready(function() {
         var email = $("#useremail").val();
         var pin = $("#userpin").val();
         
-        function isEmail(email) {
-          var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-          return regex.test(email);
-        }
+
 
         function isPin(pin) {
           var regex = /^[0-9]{1,6}$/;
@@ -826,7 +828,7 @@ $( document ).ready(function() {
             }else if(checkEmptyAddressRows()){
                 console.log("Doing checkEmptyAddressRows");
                 $.showNotification({
-                    body:"<h3>" + "Please make sure there are no empty airdrop addresses or use a csv file to upload addresses." + "</h3>",
+                    body:"<h3>" + "Please make sure there are no empty airdrop emails or use a csv file to upload addresses." + "</h3>",
                     duration: 1200,
                     maxWidth:"820px",
                     shadow:"0 2px 6px rgba(0,0,0,0.2)",
@@ -845,7 +847,20 @@ $( document ).ready(function() {
                     $('#addressTable >tbody >tr').each(function() {
                         airdropAddressesMode = "manualEntry";
                         var address = $(this).find("td:eq(0)  input[type='text']").val();
-                        airDropAddresses.push(address);    
+                        if(isEmail(address)){
+                          airDropAddresses.push(address); 
+                        }else{
+                            $.showNotification({
+                              body:"<h3>" + "Please make sure to use correct email format." + "</h3>",
+                              duration: 1200,
+                              maxWidth:"820px",
+                              shadow:"0 2px 6px rgba(0,0,0,0.2)",
+                              zIndex: 100,
+                              margin:"5rem"
+                          });
+                          throw "err"
+                        }
+                           
                     })
                 }    
 

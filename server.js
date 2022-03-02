@@ -303,6 +303,10 @@ Monaliza.deployed().then(function(instance) {
 })*/
 //app.use('/api', proxy('https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'));
 
+async function checkWalletSignature(){
+    
+}
+
 app.post('/saveuseremailpubaddress', async (req, res, next) => {
     console.log("Starting to saveuserpubaddress");
     console.log(req.body);
