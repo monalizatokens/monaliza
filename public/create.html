@@ -17,7 +17,7 @@
 <body data-spy="scroll" data-target="#main-nav" id="home">
       <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
       <div class="container">
-          <a href="indexnew.html" class="navbar-brand font-weight-bold">Monaliza</a>
+          <a href="index.html" class="navbar-brand font-weight-bold">Monaliza</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarcollapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -46,9 +46,10 @@
           
             <!--<button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Sign Up</button>-->
             <!--<button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>-->
+            <button id="exportwallet" class="btn btn-lg btn-gradient text-white export-wallet-btn ml-2 mr-2" style="visibility: hidden;">Export Wallet</button>
             <button class="btn btn-lg btn-gradient text-white sign-in-btn ml-2 mr-2">Sign In</button>
-            <a href="#" id="exportwallet" class="icon-block" style="visibility: hidden;"><i class='far fa-arrow-alt-circle-up' style='font-size:32px'></i></a>
-            <i class="fas fa-user-circle fa-2x ml-3"></i>
+            <!--<a href="#" id="exportwallet" class="icon-block" style="visibility: hidden;"><i class='far fa-arrow-alt-circle-up' style='font-size:32px'></i>Export wallet</a>-->
+            <!--<i class="fas fa-user-circle fa-2x ml-3"></i>-->
 
 
           </div>
@@ -85,7 +86,7 @@
                       <!--<p><input type="file"  accept="image/*" name="image" id="file-to-upload"  onchange="loadFile(event)" style="display: none;"></p>-->
                       <!--<p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>-->
                       <p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Video</label></p>
-                      <p><img id="output" width="100" /></p>
+                      <p><video id="output" width="100" /></p>
                      </div>
                      <input 
                        type="submit" 

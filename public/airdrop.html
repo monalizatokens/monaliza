@@ -37,11 +37,10 @@
               <a class="nav-link" href="claim.html">Claim</a>
             </li> 
           </ul>
-          
+            <button id="exportwallet" class="btn btn-lg btn-gradient text-white export-wallet-btn ml-2 mr-2" style="visibility: hidden;">Export Wallet</button>
             <button class="btn btn-lg btn-gradient text-white sign-in-btn ml-2 mr-3">Sign In</button>
 
-            <a href="#" id="exportwallet" class="icon-block" style="visibility: hidden;"><i class='far fa-arrow-alt-circle-up' style='font-size:32px'></i></a>
-            <i class="fas fa-user-circle fa-2x ml-3"></i>
+            <!--<i class="fas fa-user-circle fa-2x ml-3"></i>-->
         </div>
        </div> 
       </nav>
@@ -115,7 +114,7 @@
                         <tr>
                           <!--<th scope="row">1</th>-->
                           <td class="col-sm-11">
-                            <input type="text" name="name" class="form-control" />
+                            <input type="email" name="name" class="form-control" />
                           </td>
                           <td>
                             <input type="button" class="btn btn-block btn-default" id="addrow" onclick="childrenRow()" value="+" />

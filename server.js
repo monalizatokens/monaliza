@@ -272,7 +272,7 @@ app.use(morgan('dev'));
     //dest: './public/uploads/',
     storage: storage, 
     limits:{
-      fileSize: 10000000
+      fileSize: 100000000
     },
   })
 
@@ -1375,15 +1375,21 @@ app.post('/checkvercode', async (req, res) => {
     console.log('Connected successfully to mongo server');
     const db = client.db(dbName);
     const collection = db.collection('vercodes');
-    result = await collection.find({email: req.body.email}).toArray();
-    console.log(result[0].verificationCode);
-    console.log(result[0].updatedAt.default);
-    console.log(new Date().valueOf());
-    console.log(parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000)
-    if(result[0].verificationCode == req.body.code && (parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000 < 121)){
-        res.json({"message":"success"})
-    }else{
+    try{
+        result = await collection.find({email: req.body.email}).toArray();
+        console.log(result[0].verificationCode);
+        console.log(result[0].updatedAt.default);
+        console.log(new Date().valueOf());
+        console.log(parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000)
+        if(result[0].verificationCode == req.body.code && (parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000 < 121)){
+            res.json({"message":"success"})
+        }else{
+            res.json({"message":"failure"})
+        }
+    }catch(e){
         res.json({"message":"failure"})
+    }finally{
+        client.close();
     }
 });
 
