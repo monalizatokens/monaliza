@@ -8,6 +8,8 @@ var validationStatus;
 var airdropAddressesMode;
 var currentAssetContractAddress;
 var accountHere;
+var emailHere= "";
+var signedMessage="";
 const Gsn = require("@opengsn/provider");
 console.log(Gsn)
 const RelayProvider = Gsn.RelayProvider;
@@ -142,7 +144,7 @@ $( document ).ready(function() {
           //await refreshAccountData();
         }      
 
-    var emailHere= ""
+
 
     /*$.showNotification({
         body:"<h5>" + "Please connect your wallet." + "</h5>",
@@ -205,12 +207,13 @@ $( document ).ready(function() {
           e.preventDefault();
     })
     
-    $("#create-asset-btn").click(function()
+    $("#create-asset-btn").click(async function()
         {
+
+            console.log(signedMessage);
             var validationStatus = validateFields();
             console.log(validationStatus);
             if(validationStatus == true){
-                var signedMessage;
                 /*async function signMessage(){
                     console.log("signing now");
                     const web3Instance = new Web3(provider);
@@ -253,7 +256,8 @@ $( document ).ready(function() {
                     docURL: $("#docURL").val(),
                     description: $("#description").val(),
                     addresses: addressses,
-                    sign: signedMessage
+                    sign: signedMessage,
+                    pubAddress: accountHere
                 }
                 var url = "/deploynftcontract"
                 
@@ -455,7 +459,7 @@ $( document ).ready(function() {
                               console.log("Address: " + wallet.address);
                               var pubAddress = wallet.address;
                               var pk = wallet.privateKey;
-                              var data = {email: email, pubAddress: wallet.address}
+                              var data = {email: email, pubAddress: wallet.address, code: code}
                               store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
                               $.ajax( {
                                 url: '/saveuseremailpubaddress',
@@ -661,7 +665,7 @@ $( document ).ready(function() {
                           data: JSON.stringify(data),
                           contentType: "application/json; charset=utf-8",
                           dataType: "json",
-                          success: function(result){
+                          success: async function(result){
                               console.log(result);
                               if(result.message == "success"){
                                 $("#signin").hide();
@@ -671,7 +675,19 @@ $( document ).ready(function() {
                                 $.showNotification({
                                   body:"<h5>Successfully authenticated. Your address is " + getPv.result.pubAddress  +"</h5>"
                                 })
-              
+                                //var signedMessage = await signMessage();
+                                const ethersProvider = new ethers.providers.JsonRpcProvider("https://rpc-mumbai.maticvigil.com/");
+                                console.log(ethersProvider);
+                                const wallet = new ethers.Wallet(getPv.result.privateKey, ethersProvider);
+                                console.log(wallet);
+                                
+                                //let messageHash = ethers.utils.id("I signed it");
+                                //let messageHashBytes = ethers.utils.arrayify(messageHash)
+                                //signedMessage = await wallet.signMessage(messageHashBytes);
+                                var signature = await wallet.signMessage("I signed it");
+                                signedMessage = signature;
+                                console.log(signedMessage);
+
                                 if( window.location.pathname.includes("claim.html")){
                                   loadClaimableAirdrops(getPv.result.pubAddress);
                                 }else if(window.location.pathname.includes("airdrop.html")){
@@ -938,7 +954,9 @@ $( document ).ready(function() {
                     "assetName": $("#assetList > option")[0].text,
                     "description": $("#assetList option:selected").attr("description"),
                     "ipfsURL": $("#assetList option:selected").attr("ipfsURL"),
-                    "fileName": $("#assetList option:selected").attr("filename")
+                    "fileName": $("#assetList option:selected").attr("filename"),
+                    sign: signedMessage,
+                    pubAddress: accountHere
                 }
                 $.ajax( {
                     url: '/createairdrop',
@@ -1026,7 +1044,8 @@ $( document ).ready(function() {
                                 "assetContractAddress": assetContractAddress,
                                 "ipfsURL": ipfsURL,
                                 "msg": msg,
-                                "sign": ""
+                                sign: signedMessage,
+                                pubAddress: accountHere
                             }
                             $("#myProgress").show();
                             $(window).scrollTop(0);
