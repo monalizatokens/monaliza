@@ -624,7 +624,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
             console.log(value);
             })*/
             //
-            var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress, "0x4d4581c01A457925410cd3877d17b2fd4553b2C5");
+            var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress, "0xCB8e0DE47A619d2f26450f22F40399f1B4E015e9");
             //var sendPromise = await monalizaFactory.deployNFTContract("AAA", "AAAA", "0xEdB9535F3689cfedE4a309455fC33C9A7367F87D");
             console.log(sendPromise);
             /*sendPromise.then(function(transaction){
@@ -1067,7 +1067,7 @@ app.post('/claimairdrop', async (req, res) => {
                 var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
                 console.log(tokenIDObtained);
                 console.log("token ID from fn call is " + tokenIDObtained.toString());
-                var owner = monaliza.ownerOf(tokenIDObtained.toString());
+                /*var owner = monaliza.ownerOf(tokenIDObtained.toString());
                 if(owner == req.body.pubAddress){
                     res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenIDObtained.toString()});
                     saveAirdropClaimedInMongo(req, tokenIDObtained.toString())
@@ -1075,7 +1075,7 @@ app.post('/claimairdrop', async (req, res) => {
                     .catch(console.error)
                     .finally(() => client.close());
                     return;
-                }
+                }*/
                 //var tx =  await monaliza.setApprovalForAll("0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", true, gasFeeOptions);
                 //console.log(tx);
                 //var status = await monaliza.isApprovedForAll("0xEdB9535F3689cfedE4a309455fC33C9A7367F87D","0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", gasFeeOptions)
@@ -1086,8 +1086,8 @@ app.post('/claimairdrop', async (req, res) => {
                 console.log(sendPromise2);*/
             }
             
-            console.log('Waiting...');
-            setTimeout(sayHello, 6000, 'John Doe');
+            //console.log('Waiting...');
+            //setTimeout(sayHello, 8000, 'John Doe');
 
             //Invoke contract function getLastTokenID(Monaliza contractAddress) and get tokenID
 
