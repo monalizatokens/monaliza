@@ -316,14 +316,17 @@ app.post('/saveuseremailpubaddress', async (req, res, next) => {
     const db = client.db(dbName);
     const collection = db.collection('vercodes');
     try{
+        const uepaCollection = db.collection('useremailpubaddress');
+        var pubAddArr = await uepaCollection.find({userEmail: req.body.email}).toArray();
+        var pubAddress = pubAddArr[0].userPublicAddress;
+        console.log(pubAddress);
         result = await collection.find({email: req.body.email}).toArray();
         console.log(result[0].verificationCode);
         console.log(result[0].updatedAt.default);
         console.log(new Date().valueOf());
         console.log(parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000)
-        if(result[0].verificationCode == req.body.code && (parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000 < 121)){
+        if(!pubAddress && result[0].verificationCode == req.body.code && (parseInt((new Date().valueOf()) - parseInt(result[0].updatedAt.default))/1000 < 121)){
             console.log("comparison works");
-            const uepaCollection = db.collection('useremailpubaddress');
 
             const insertResult = await uepaCollection.insertOne({
                 "userEmail": req.body.email,
