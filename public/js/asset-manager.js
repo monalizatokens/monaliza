@@ -461,7 +461,7 @@ $( document ).ready(function() {
                             var pk = wallet.privateKey;
                             var data = {email: email, pubAddress: wallet.address, code: code}
                             store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
-                            
+
                               $.ajax( {
                                 url: '/saveuseremailpubaddress',
                                 type: 'POST',
@@ -1178,7 +1178,7 @@ $( document ).ready(function() {
                 
                 var airdroppedAssetsGroupofThree = groupByThree(input); 
                 console.log(airdroppedAssetsGroupofThree); 
-                for(var counter=0; counter < 1; counter++){
+                for(var counter=0; counter < airdroppedAssetsGroupofThree.length; counter++){
                 //for(var counter=0; counter < airdroppedAssetsGroupofThree.length; counter++){
                     /*$($(".col-sm-8")[0]).append(addCardDeck());
                     console.log(airdroppedAssetsGroupofThree[counter].length);
