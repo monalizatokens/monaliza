@@ -17,7 +17,7 @@
 <body data-spy="scroll" data-target="#main-nav" id="home">
       <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
       <div class="container">
-          <a href="index1.html" class="navbar-brand font-weight-bold">Monaliza</a>
+          <a href="index.html" class="navbar-brand font-weight-bold">Monaliza</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarcollapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -36,18 +36,23 @@
             <li class="nav-item">
               <a class="nav-link" href="claim.html">Claim</a>
             </li> 
-            <li class="nav-item">
+            <!--<li class="nav-item">
               <a class="nav-link" href="inbox.html">Inbox</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="sent.html">Sent</a>
-            </li>
+            </li>-->
           </ul>
           
-            <button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>
-            
-            <i class="fas fa-user-circle fa-2x ml-3"></i>
-        </div>
+            <!--<button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Sign Up</button>-->
+            <!--<button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>-->
+            <button id="exportwallet" class="btn btn-lg btn-gradient text-white export-wallet-btn ml-2 mr-2" style="visibility: hidden;">Export Wallet</button>
+            <button class="btn btn-lg btn-gradient text-white sign-in-btn ml-2 mr-2">Sign In</button>
+            <!--<a href="#" id="exportwallet" class="icon-block" style="visibility: hidden;"><i class='far fa-arrow-alt-circle-up' style='font-size:32px'></i>Export wallet</a>-->
+            <!--<i class="fas fa-user-circle fa-2x ml-3"></i>-->
+
+
+          </div>
        </div> 
       </nav>
 
@@ -81,7 +86,7 @@
                       <!--<p><input type="file"  accept="image/*" name="image" id="file-to-upload"  onchange="loadFile(event)" style="display: none;"></p>-->
                       <!--<p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Image</label></p>-->
                       <p><label for="file-to-upload" style="cursor: pointer;"> <i class="far fa-image fa-5x mt-5" style="color:lightgrey"></i><br>Upload Video</label></p>
-                      <p><img id="output" width="100" /></p>
+                      <p><video id="output" width="100" /></p>
                      </div>
                      <input 
                        type="submit" 
@@ -132,15 +137,98 @@
        </div>
       </div>    
       </header>
+      <div id="signin" class="modal" tabindex="-1" role="dialog" assetContractID="" tokenID="">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Sign In</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <!--<p>Enter email address of recipient and send NFT.</p>-->
+    
+                <div class="form-group">
+                  <label for="useremailforsignin">Your email address</label>
+                  <input type="email" class="form-control mb-3" id="useremailforsignin" aria-describedby="emailHelp" placeholder="Enter your email address">
+                  <label for="userpinforsignin">Your 6-digit PIN </label>
+                  <input type="password" class="form-control mb-3" id="userpinforsignin" aria-describedby="emailHelp" placeholder="Enter 6-digit number as PIN">
+                  <label for="vercodeforsignin">Verification Code <a id="requestvercode" href="#">Send verification code on email</a></label>
+                  <input type="text" class="form-control" id="vercodeforsignin" aria-describedby="emailHelp" placeholder="Enter e-mail verification code">
+                    <!--<small id="emailHelp" class="form-text text-muted"></small>-->
+                </div>
+                <!--<div class="form-group">
+                  <label for="exampleInputPassword1">Password</label>
+                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                  <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                </div>-->
+                <button id="signinsubmitbtn" class="btn btn-primary">Submit</button>
+    
+            </div>
+            <!--<div class="modal-footer">
+              <button type="button" class="btn btn-primary">Send</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>-->
+          </div>
+        </div>
+      </div>
+      <div id="exportwalletmodal" class="modal" tabindex="-1" role="dialog" assetContractID="" tokenID="">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Export Wallet</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <!--<p>Enter email address of recipient and send NFT.</p>-->
+    
+                <div class="form-group">
+                  <label for="useremailforexport">Your email address</label>
+                  <input type="email" class="form-control mb-3" id="useremailforexport" aria-describedby="emailHelp" placeholder="Enter your email address">
+                  <label for="userpinforexport">Your 6-digit PIN </label>
+                  <input type="password" class="form-control mb-3" id="userpinforexport" aria-describedby="emailHelp" placeholder="Enter 6-digit number as PIN">
+                  <label for="vercodeforexport">Verification Code <a id="requestvercodeforexport" href="#">Send verification code on email</a></label>
+                  <input type="text" class="form-control" id="vercodeforexport" aria-describedby="emailHelp" placeholder="Enter e-mail verification code">
+                    <!--<small id="emailHelp" class="form-text text-muted"></small>-->
+                </div>
+                <!--<div class="form-group">
+                  <label for="exampleInputPassword1">Password</label>
+                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                  <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                </div>-->
+                <button id="exportwalletsubmitbtn" class="btn btn-primary mb-3">Submit</button>
+                <label id="labelexportwalletpk" for="exportwalletpk" style="font-weight: bold; display: none;">Your Wallet Private Key (Keep it safe, don't share with anyone) </label>
+                <textarea id="exportwalletpk" rows="2" cols="60" wrap="hard" readonly style="border: 0px; display: none; margin-bottom: 3px;"></textarea> 
 
+    
+            </div>
+            <!--<div class="modal-footer">
+              <button type="button" class="btn btn-primary">Send</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>-->
+          </div>
+        </div>
+      </div>
       <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
   crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
   crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
   crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdn.ethers.io/lib/ethers-5.1.umd.min.js" ></script>
   <script type="text/javascript" src="https://unpkg.com/web3@1.2.11/dist/web3.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
+  <script type="text/javascript" src="./js/opengsnprovider.js"></script>
+  <script type="text/javascript" src="./js/web3providershttp.js"></script>
   <script type="text/javascript" src="https://unpkg.com/evm-chains@0.2.0/dist/umd/index.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>  <script src=js/bootstrap-show-notification.js></script>

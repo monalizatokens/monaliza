@@ -17,7 +17,7 @@
 <body data-spy="scroll" data-target="#main-nav" id="home">
   <nav class="navbar navbar-expand-sm navbar-light shadow" id="main-nav">
   <div class="container">
-      <a href="index1.html" class="navbar-brand font-weight-bold">Monaliza</a>
+      <a href="index.html" class="navbar-brand font-weight-bold">Monaliza</a>
     <button class="navbar-toggler" type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarcollapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -27,18 +27,19 @@
         <li class="nav-item active">
           <a class="nav-link" href="index.html">Home</a>
         </li>
-       <!--<li class="nav-item">
+       <li class="nav-item">
           <a class="nav-link" href="create.html">Create</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="airdrop.html">Airdrop</a>
-        </li> -->   
+        </li>   
         <li class="nav-item">
           <a class="nav-link" href="claim.html">Claim</a>
         </li> 
       </ul>
       
-        <button class="btn btn-lg btn-gradient text-white connect-wallet-btn">Connect Wallet</button>
+        <button class="btn btn-lg btn-gradient text-white sign-up-btn">Sign Up</button>
+        <!--<button class="btn btn-lg btn-gradient text-white sign-in-btn ml-2">Sign In</button>-->
        </div>
    </div> 
   </nav>
@@ -49,7 +50,7 @@
       <div class="container">
         <div class="row">
           <div class="col">            
-              <h1 class="text-center mt-5" style="color: rgb(238, 208, 225);">No code decentralized application for fungible and <br>non-fungibles tokens.</h1>              
+              <h1 class="text-center mt-5" style="color: rgb(238, 208, 225);">Making web3 inclusive and accessible <br>with NFT by email</h1>              
            </div>             
           </div>
          </div>
@@ -90,9 +91,86 @@
           </div>
       </div>
   </section>
-        
 
-         
+  <div id="signup" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Sign Up</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!--<p>Enter email address of recipient and send NFT.</p>-->
+
+            <div class="form-group">
+              <label for="useremail">Your email address</label>
+              <input type="email" class="form-control mb-3" id="useremailforsignin" aria-describedby="emailHelp" placeholder="Enter your email address">
+              <label for="userpin">Your 6-digit PIN </label>
+              <input type="password" class="form-control mb-3" id="userpin" aria-describedby="emailHelp" placeholder="Enter 6-digit number as PIN">
+              <label for="vercodeforsignin">Verification Code <a id="requestvercode" href="#">Send verification code on email</a></label>
+              <input type="text" class="form-control" id="vercodeforsignin" maxlength='6' aria-describedby="emailHelp" placeholder="Enter e-mail verification code">
+              <!--<small id="emailHelp" class="form-text text-muted"></small>-->
+            </div>
+            <!--<div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="exampleCheck1">
+              <label class="form-check-label" for="exampleCheck1">Check me out</label>
+            </div>-->
+            <button id="signupsubmitbtn" class="btn btn-primary">Sign Up</button>
+
+        </div>
+        <!--<div class="modal-footer">
+          <button type="button" class="btn btn-primary">Send</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>-->
+      </div>
+    </div>
+  </div>  
+  
+          <div id="signin" class="modal" tabindex="-1" role="dialog" assetContractID="" tokenID="">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Sign In</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <!--<p>Enter email address of recipient and send NFT.</p>-->
+      
+                  <div class="form-group">
+                    <label for="useremailforsignin">Your email address</label>
+                    <input type="email" class="form-control mb-3" id="useremailforsignin" aria-describedby="emailHelp" placeholder="Enter your email address">
+                    <label for="userpinforsignin">Your 6-digit PIN </label>
+                    <input type="password" class="form-control mb-3" id="userpinforsignin" aria-describedby="emailHelp" placeholder="Enter 6-digit number as PIN">
+                    <label for="vercodeforsignin">Verification Code (validity 120 seconds) <a id="requestvercode" href="#">Send code on email</a></label>
+                    <input type="text" class="form-control" id="vercodeforsignin" aria-describedby="emailHelp" placeholder="Enter e-mail verification code">
+                      <!--<small id="emailHelp" class="form-text text-muted"></small>-->
+                  </div>
+                  <!--<div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                  </div>
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                  </div>-->
+                  <button id="signinsubmitbtn" class="btn btn-primary">Submit</button>
+      
+              </div>
+              <!--<div class="modal-footer">
+                <button type="button" class="btn btn-primary">Send</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>-->
+            </div>
+          </div>
+        </div>
 
        
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
@@ -108,11 +186,13 @@
   <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.2.1/dist/umd/index.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
   <script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script>
-  <script src="https://cdn.ethers.io/scripts/ethers-v3.min.js"
+  <script type="text/javascript" src="./js/opengsnprovider.js"></script>
+  <script type="text/javascript" src="./js/web3providershttp.js"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.1.umd.min.js"
         charset="utf-8"
         type="text/javascript">
   </script>
 
-  <script src=js/asset-manager.js></script>
+  <script src="js/asset-manager.js"></script>
 </body>
 </html>

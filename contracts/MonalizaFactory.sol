@@ -1,27 +1,37 @@
 pragma solidity ^0.8.0;
 
 import "./ERC721Tradable.sol";
-
+import "@opengsn/contracts/src/BaseRelayRecipient.sol";
 /**
  * @title Monaliza
  * Monaliza - the contract for non-fungible Monaliza NFTs.
  */
-contract Monaliza is ERC721Tradable {
+contract Monaliza is BaseRelayRecipient, ERC721Tradable {
     //using Counters for Counters.Counter;
     //Counters.Counter private _tokenIds;
     string private _localBaseURI;
     mapping (uint256 => string) private _tokenURIs;
     //mapping (uint256 => string) private _tokenURIs;
-    mapping (address => bool) public allowedAddresses;
-
-
-    constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress)
+    //mapping (address => bool) public allowedAddresses;
+     string public override versionRecipient = "2.2.0";
+     
+     constructor(string memory tokenName, string memory symbol, address _proxyRegistryAddress, address forwarder)
         ERC721Tradable(tokenName, symbol, _proxyRegistryAddress)
     {
-        
+        _setTrustedForwarder(forwarder); 
     }
 
-    function setAddressesAllowedForMinting(address[] memory addressesAllowedForMinting) public virtual {
+          
+
+    function _msgData() internal view override(Context, BaseRelayRecipient) returns (bytes memory) {
+        return BaseRelayRecipient._msgData();
+    }
+
+    function _msgSender() internal view override(ERC721Tradable, BaseRelayRecipient) returns (address ret) {
+        return BaseRelayRecipient._msgSender();
+    }
+
+    /*function setAddressesAllowedForMinting(address[] memory addressesAllowedForMinting) public virtual {
         //require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
         //addressesAllowedForMinting = addressesAllowedForMinting;
         for (uint i=0; i < addressesAllowedForMinting.length; i++) {
@@ -31,7 +41,7 @@ contract Monaliza is ERC721Tradable {
 
     function isAddressAllowed(address to) public view returns (bool){
         return allowedAddresses[to];
-    }
+    }*/
 
     function _setTokenURI(uint256 tokenId, string memory _tokenURI) public virtual {
         require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
@@ -66,13 +76,14 @@ contract MonalizaFactory {
     mapping (address => uint256) public lastTokenIDs;
     event Mint(Monaliza tokenAddress, uint256 newItemId); 
     event DeployContract(string name, string symbol, address newContract); 
-    event AddAirDrop(address tokenAddress); 
+    //event AddAirDrop(address tokenAddress); 
     event TransferToken(Monaliza tokenAddress, address toAddress, uint256 tokenId);
     address owner;
 
     constructor() public{
       owner = msg.sender;
     }   
+
 
     function getContractCount() public view returns(uint contractCount) {
         return contracts.length;
@@ -82,8 +93,8 @@ contract MonalizaFactory {
         return lastContractAddress;
     }
 
-    function deployNFTContract(string memory name, string memory symbol, address registryAddress) public returns(address newContract){
-         Monaliza c = new Monaliza(name, symbol, registryAddress);
+    function deployNFTContract(string memory name, string memory symbol, address registryAddress, address forwarder) public returns(address newContract){
+         Monaliza c = new Monaliza(name, symbol, registryAddress, forwarder);
          //c.setLocalBaseURI(baseURI);
          address cAddr = address(c);
          contracts.push(cAddr);
@@ -93,31 +104,32 @@ contract MonalizaFactory {
          return cAddr;
     }
 
-    function addAirDrop(Monaliza tokenAddress, address[] memory addressesAllowedForMinting) public returns(address contractAddress){
+    /*function addAirDrop(Monaliza tokenAddress, address[] memory addressesAllowedForMinting) public returns(address contractAddress){
          require(msg.sender == owner);
          tokenAddress.setAddressesAllowedForMinting(addressesAllowedForMinting);
          //c.setLocalBaseURI(baseURI);
          address cAddr = address(tokenAddress);
          emit AddAirDrop(cAddr);
         return cAddr;
-    }
+    }*/
 
     function mintNFT(Monaliza tokenAddress, address to, string memory tokenURI) public returns(uint256 newItemId) {
         require(msg.sender == owner);
 
-        if(tokenAddress.isAddressAllowed(to)){
+        //if(tokenAddress.isAddressAllowed(to)){
                 newItemId = tokenAddress.mintTo(to);
                 tokenAddress._setTokenURI(newItemId, tokenURI);
                 lastTokenIDs[address(tokenAddress)] = newItemId;
 
                 emit Mint(tokenAddress, newItemId);
                 return newItemId;
-        }
+        //}
 
     }   
 
     function transferToken(Monaliza tokenAddress, address from, address to, uint256 tokenID) public returns(uint256 newItemId) {
         //require(msg.sender == tokenAddress.owner());
+        //tokenAddress.approve(to, tokenID);
         tokenAddress.safeTransferFrom(from, to, tokenID);
         emit TransferToken(tokenAddress, to, tokenID);
         return tokenID;
@@ -128,9 +140,9 @@ contract MonalizaFactory {
         return newItemId;
     }    
 
-    function isAddressAllowedForMinting(Monaliza contractAddress, address userAddress) public view returns(bool) {
+    /*function isAddressAllowedForMinting(Monaliza contractAddress, address userAddress) public view returns(bool) {
         return contractAddress.isAddressAllowed(userAddress);  
-    }   
+    }*/   
 
     function getBaseTokenURI(Monaliza contractAddress) public view returns(string memory baseURI) {
         baseURI = contractAddress.baseTokenURI();
