@@ -142,7 +142,7 @@ var cors = require('cors')
 const contract = require("./artifacts/contracts/MonalizaFactory.sol/MonalizaFactory.json")
 const monaLizaContract = require("./build/contracts/Monaliza.json")
 
-var monalizaFactoryContractAddress = "0xE30bE14Ab656d3bC09C9F7ff6Da21BdB85DEa84E";
+var monalizaFactoryContractAddress = "0xFC7e62A2C1d52cE1A9f53C16eF59B20Ff0e13F23";
 var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
 
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
