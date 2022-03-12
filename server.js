@@ -1067,6 +1067,15 @@ app.post('/claimairdrop', async (req, res) => {
                 var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
                 console.log(tokenIDObtained);
                 console.log("token ID from fn call is " + tokenIDObtained.toString());
+                var owner = monaliza.ownerOf(tokenIDObtained.toString());
+                if(owner == req.body.pubAddress){
+                    res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenIDObtained.toString()});
+                    saveAirdropClaimedInMongo(req, tokenIDObtained.toString())
+                    .then(console.log)
+                    .catch(console.error)
+                    .finally(() => client.close());
+                    return;
+                }
                 //var tx =  await monaliza.setApprovalForAll("0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", true, gasFeeOptions);
                 //console.log(tx);
                 //var status = await monaliza.isApprovedForAll("0xEdB9535F3689cfedE4a309455fC33C9A7367F87D","0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", gasFeeOptions)
