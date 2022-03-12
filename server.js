@@ -1054,9 +1054,9 @@ app.post('/claimairdrop', async (req, res) => {
             //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
             var options = { nonce: newNonce};
 
-            var gasFeeOptions = {gasLimit: 25, gasPrice: 8000000000}
+            var gasFeeOptions = {gasLimit: 2500000, gasPrice: 8000000000}
         
-            var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.pubAddress, req.body.ipfsURL, gasFeeOptions);
+            var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.pubAddress, req.body.ipfsURL);
             console.log(sendPromise);
             //Check if transaction hash is sucessful
             //https://ethereum.stackexchange.com/questions/80617/how-can-i-know-a-hash-mined-and-confirmed-by-ethers-js/80622
