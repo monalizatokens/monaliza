@@ -1054,7 +1054,7 @@ app.post('/claimairdrop', async (req, res) => {
             //var options = { gasPrice: 1000000000, gasLimit: 85000, nonce: newNonce + 1, value: 0 };
             var options = { nonce: newNonce};
 
-            var gasFeeOptions = {gasLimit: 4200000, gasPrice: 8000000000}
+            var gasFeeOptions = {gasLimit: 5200000, gasPrice: 9500000000}
         
             var sendPromise = await monalizaFactory.mintNFT(req.body.assetContractAddress, req.body.pubAddress, req.body.ipfsURL, gasFeeOptions);
             console.log(sendPromise);
