@@ -455,6 +455,13 @@ $( document ).ready(function() {
                           if(getPv.result){
                               $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
                           }else{
+                            var wallet = ethers.Wallet.createRandom();
+                            console.log("Address: " + wallet.address);
+                            var pubAddress = wallet.address;
+                            var pk = wallet.privateKey;
+                            var data = {email: email, pubAddress: wallet.address, code: code}
+                            store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
+                            
                               $.ajax( {
                                 url: '/saveuseremailpubaddress',
                                 type: 'POST',
@@ -464,13 +471,7 @@ $( document ).ready(function() {
                                 success: function(result){
                                     console.log(result);
                                     if(result.message == "success"){
-                                      var wallet = ethers.Wallet.createRandom();
-                                      console.log("Address: " + wallet.address);
-                                      var pubAddress = wallet.address;
-                                      var pk = wallet.privateKey;
-                                      var data = {email: email, pubAddress: wallet.address, code: code}
-                                      store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
-                                                                            
+                                                                          
                                       $("#signup").hide();
                                       $.showNotification({
                                         body:"<h5>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h5>"
