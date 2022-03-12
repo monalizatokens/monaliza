@@ -317,8 +317,13 @@ app.post('/saveuseremailpubaddress', async (req, res, next) => {
     const collection = db.collection('vercodes');
     try{
         const uepaCollection = db.collection('useremailpubaddress');
-        var pubAddArr = await uepaCollection.find({userEmail: req.body.email}).toArray();
-        var pubAddress = pubAddArr[0].userPublicAddress;
+        var pubAddress = undefined;
+        pubAddArr = await uepaCollection.find({userEmail: req.body.email}).toArray();
+
+        if(pubAddArr && pubAddArr[0]){
+            pubAddress = pubAddArr[0].userPublicAddress;
+        }
+
         console.log(pubAddress);
         result = await collection.find({email: req.body.email}).toArray();
         console.log(result[0].verificationCode);
