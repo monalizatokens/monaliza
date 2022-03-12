@@ -452,7 +452,7 @@ $( document ).ready(function() {
           
                       getPv.onsuccess = function() {
                           console.log(getPv.result);
-                          if(! getPv.result){
+                          if(getPv.result){
                               $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
                           }else{
                               $.ajax( {
