@@ -684,7 +684,7 @@ $( document ).ready(function() {
                 getPv.onsuccess = function() {
                     //console.log(getPv.result);
                     try{
-                      accountHere = getPv.result.pubAddress;
+                      accountHere = getPv.result.pubAddress; 
                     }catch(e){
                       $.showNotification({
                         body:"<h5>Account does not exist. Please sign up.</h5>",
