@@ -86,6 +86,10 @@ $( document ).ready(function() {
     }else{
       //User is signed in, proceed 
       signedIn = true;
+      if( window.location.pathname.includes("index.html")){
+        $(".sign-up-btn").text("Sign Out");
+      }
+
       $(".sign-in-btn").text("Sign Out");
       $(".sign-in-btn").css("visibility", "visible");
       $("#exportwallet").css("visibility", "visible");
@@ -407,6 +411,15 @@ $( document ).ready(function() {
     }
       $(".sign-up-btn").click(function(){
         console.log("sign-up-btn clicked");
+        
+        if($(".sign-up-btn").html() == "Sign Out"){
+          localStorage.clear();
+          accountHere = undefined;
+          emailHere  = undefined;
+          signedMessage  = undefined;
+          window.location.href = "/claim.html";
+          return;
+        }
 
         if (!window.indexedDB) {
           console.log("Your browser doesn't support a stable version of IndexedDB. Such and such feature will not be available.");
