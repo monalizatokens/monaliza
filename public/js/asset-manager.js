@@ -10,6 +10,8 @@ var currentAssetContractAddress;
 var accountHere;
 var emailHere= "";
 var signedMessage="";
+var signedIn;
+var lastClear;
 const Gsn = require("@opengsn/provider");
 console.log(Gsn)
 const RelayProvider = Gsn.RelayProvider;
@@ -59,6 +61,43 @@ $( document ).ready(function() {
     /**
      * Setup the orchestra
      */
+    lastClear = localStorage['lastClear'];
+    var time_now  = (new Date()).getTime();
+    if ((time_now - lastClear) > 1000 * 60) {
+
+      localStorage.clear();
+  
+    }
+
+    if(localStorage["accountHere"]){
+      accountHere = localStorage["accountHere"]
+    }
+    if(localStorage["emailHere"]){
+      emailHere = localStorage["emailHere"]
+    }
+    if(localStorage["signedMessage"]){
+      signedMessage = localStorage["signedMessage"]
+    }
+
+    if(! (accountHere && emailHere && signedMessage)){
+      //Show Sign In button
+      signedIn = false;
+      $(".sign-in-btn").css("visibility", "visible");
+    }else{
+      //User is signed in, proceed 
+      signedIn = true;
+      $(".sign-in-btn").text("Sign Out");
+      $(".sign-in-btn").css("visibility", "visible");
+      $("#exportwallet").css("visibility", "visible");
+      if( window.location.pathname.includes("claim.html")){
+        loadClaimableAirdrops(accountHere);
+      }else if(window.location.pathname.includes("airdrop.html")){
+        getAssets(accountHere);
+      }
+    }
+
+    
+
     function init() {
     
       console.log("Initializing example");
@@ -520,6 +559,10 @@ $( document ).ready(function() {
     $(".sign-in-btn").click(function(){
       console.log("sign-in-btn clicked");
       if($(".sign-in-btn").html() == "Sign Out"){
+        localStorage.clear();
+        accountHere = undefined;
+        emailHere  = undefined;
+        signedMessage  = undefined;
         window.location.href = "/claim.html";
         return;
       }
@@ -642,8 +685,11 @@ $( document ).ready(function() {
                     //console.log(getPv.result);
                     
                     accountHere = getPv.result.pubAddress;
+                    localStorage['lastClear'] = (new Date()).getTime();
+                    localStorage["accountHere"] = accountHere;
                     console.log(accountHere);
                     emailHere = email;
+                    localStorage["emailHere"] = email;
                     var code = $("#vercodeforsignin").val();
                     if(isPin(code)){
 
@@ -688,6 +734,7 @@ $( document ).ready(function() {
                                 //signedMessage = await wallet.signMessage(messageHashBytes);
                                 var signature = await wallet.signMessage("I signed it");
                                 signedMessage = signature;
+                                localStorage["signedMessage"] = signature;
                                 console.log(signedMessage);
 
                                 if( window.location.pathname.includes("claim.html")){
