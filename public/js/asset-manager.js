@@ -683,8 +683,17 @@ $( document ).ready(function() {
 
                 getPv.onsuccess = function() {
                     //console.log(getPv.result);
-                    
-                    accountHere = getPv.result.pubAddress;
+                    try{
+                      accountHere = getPv.result.pubAddress;
+                    }catch(e){
+                      $.showNotification({
+                        body:"<h5>Account does not exist. Please sign up.</h5>",
+                        zIndex: 1051,
+                        direction: "prepend"
+                      })
+                      return;
+                    }
+
                     localStorage['lastClear'] = (new Date()).getTime();
                     localStorage["accountHere"] = accountHere;
                     console.log(accountHere);
