@@ -686,6 +686,7 @@ $( document ).ready(function() {
                     try{
                       accountHere = getPv.result.pubAddress; 
                     }catch(e){
+                      console.log(e);
                       $.showNotification({
                         body:"<h5>Account does not exist. Please sign up.</h5>",
                         zIndex: 1051,
