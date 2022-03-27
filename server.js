@@ -340,6 +340,7 @@ app.post('/saveuseremailpubaddress', async (req, res, next) => {
             console.log('Inserted documents =>', insertResult);
             res.json({"message": "success"})        
         }else{
+            console.log("came in failure")
             //failure
             res.json({"message":"failure"})
         }
@@ -1432,7 +1433,14 @@ app.post('/checkvercode', async (req, res) => {
     console.log('Connected successfully to mongo server');
     const db = client.db(dbName);
     const collection = db.collection('vercodes');
+    const useremailpubaddressCollection = db.collection('useremailpubaddress');
     try{
+        var userDetail = await useremailpubaddressCollection.find({userEmail: req.body.email}).toArray();
+        console.log(userDetail[0])
+        if(! userDetail[0] && (req.body.authType == "signin")){
+            res.json({"message":"failure_account_doesnot_exist"})
+            return;
+        }
         result = await collection.find({email: req.body.email}).toArray();
         console.log(result[0].verificationCode);
         console.log(result[0].updatedAt.default);

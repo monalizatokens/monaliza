@@ -63,7 +63,7 @@ $( document ).ready(function() {
      */
     lastClear = localStorage['lastClear'];
     var time_now  = (new Date()).getTime();
-    if ((time_now - lastClear) > 1000 * 60) {
+    if ((time_now - lastClear) > 1000 * 60 * 60 * 24 * 7) {
 
       localStorage.clear();
   
@@ -444,6 +444,7 @@ $( document ).ready(function() {
           var data = {}
           data.email = email;
           data.code = code;
+          data.authType = "signup"
           $.ajax( {
             url: '/checkvercode',
             type: 'POST',
@@ -476,6 +477,7 @@ $( document ).ready(function() {
                       var db = request.result;
                       var tx = db.transaction("User", "readwrite");
                       var store = tx.objectStore("User");
+                      //store.delete(email);
                       console.log(store);
                       //var index = store.index("emailIndex");
                       console.log(email);
@@ -493,6 +495,7 @@ $( document ).ready(function() {
                           console.log(getPv.result);
                           if(getPv.result){
                               $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
+
                           }else{
                             var wallet = ethers.Wallet.createRandom();
                             console.log("Address: " + wallet.address);
@@ -516,6 +519,7 @@ $( document ).ready(function() {
                                         body:"<h5>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h5>"
                                       })
                                     }else if(result.message == "failure"){
+                                     //store.delete(email);
                                       $.showNotification({
                                         body:"<h5>Failed to sign up. Please check if your account already exists or try again.</h5>"
                                       })
@@ -716,7 +720,7 @@ $( document ).ready(function() {
                         var data = {}
                         data.email = email;
                         data.code = code;
-
+                        data.authType = "signin"  
                         $.ajax( {
                           url: '/checkvercode',
                           type: 'POST',
@@ -752,7 +756,12 @@ $( document ).ready(function() {
                                 }else if(window.location.pathname.includes("airdrop.html")){
                                   getAssets(getPv.result.pubAddress);
                                 }
-                              }else {
+                              }else if(result.message === "failure_account_doesnot_exist") {
+                                $.showNotification({
+                                      body:"<h5>Authentication failed. Possible reason: Account doesn´t exist. Please sign up.</h5>",
+                                      zIndex: 1151
+                                })
+                             } else {
                                   $.showNotification({
                                         body:"<h5>Authentication failed.</h5>",
                                         zIndex: 1151
@@ -849,7 +858,7 @@ $( document ).ready(function() {
                   var data = {}
                   data.email = email;
                   data.code = code;
-
+                  data.authType = "signin"
                   $.ajax( {
                     url: '/checkvercode',
                     type: 'POST',
@@ -870,7 +879,13 @@ $( document ).ready(function() {
                           $("#labelexportwalletpk").css("display", "block");
                           $("#exportwalletpk").css("display", "block");
                           $("#exportwalletpk").val(getPv.result.privateKey);
-                        }else {
+                        } else if(result.message == "failure_account_doesnot_exist") {
+                          $.showNotification({
+                                body:"<h5>Authentication failed. Possible reason: Account doesn´t exist. Please sign up.</h5>",
+                                zIndex: 1151
+                          })
+                       }
+                        else {
                             $.showNotification({
                                   body:"<h5>Authentication failed.</h5>",
                                   zIndex: 1051
