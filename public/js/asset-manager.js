@@ -507,7 +507,7 @@ $( document ).ready(function() {
                       getPv.onsuccess = async function() {
                           console.log(getPv.result);
                           if(getPv.result){
-                              $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
+                              $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email. Please Sign In <a href='claim.html'>here</a>.</p></div>")
 
                           }else{
                             var wallet = ethers.Wallet.createRandom();
