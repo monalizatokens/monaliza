@@ -491,7 +491,7 @@ $( document ).ready(function() {
           
           
           
-                      getPv.onsuccess = function() {
+                      getPv.onsuccess = async function() {
                           console.log(getPv.result);
                           if(getPv.result){
                               $(".modal-body").append("<div><p style='color: red; padding-top: 2px;'>Wallet already exists for this email.</p></div>")
@@ -500,6 +500,11 @@ $( document ).ready(function() {
                             var wallet = ethers.Wallet.createRandom();
                             console.log("Address: " + wallet.address);
                             var pubAddress = wallet.address;
+                            localStorage["accountHere"] = pubAddress;
+                            localStorage["emailHere"] = email;
+                            var signature = await wallet.signMessage("I signed it");
+                            signedMessage = signature;
+                            localStorage["signedMessage"] = signedMessage;
                             var pk = wallet.privateKey;
                             var data = {email: email, pubAddress: wallet.address, code: code}
                             store.put({"email": email, "pubAddress": pubAddress, "pin": pin, "privateKey": pk});
@@ -516,8 +521,9 @@ $( document ).ready(function() {
                                                                           
                                       $("#signup").hide();
                                       $.showNotification({
-                                        body:"<h5>Wallet created successfully with address " + pubAddress +  " . You can sign in now.</h5>"
+                                        body:"<h5>Wallet created successfully with address " + pubAddress +  " . Signing now to Monaliza.</h5>"
                                       })
+                                      window.location.href = "/claim.html";
                                     }else if(result.message == "failure"){
                                      //store.delete(email);
                                       $.showNotification({
