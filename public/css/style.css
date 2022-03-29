@@ -7,11 +7,8 @@
 }
 
 .btn-gradient{
-    background-color: #ff0062;
-    border-radius: 35px;   
-    box-shadow: 1px 1px 3px 0 lightgray;
-    backdrop-filter: blur(5px);
-    white-space: normal;
+    background-image: linear-gradient(to right, #ff0062, #de7150); 
+    border-radius: 35px;
 }
 
 .styling{
