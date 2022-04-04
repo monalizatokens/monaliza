@@ -44,6 +44,8 @@ const readline = require('readline');
 const {google} = require('googleapis');
 var proxy = require('express-http-proxy');
 var httpProxy = require('http-proxy');
+const swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
 
 /*async function main() {
     // Use connect method to connect to the server
@@ -224,14 +226,11 @@ async function testhh(){
 
 
 const app = express();
-var apiProxy = httpProxy.createProxyServer({ssl: options});
-var backend = 'https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'
-app.all("/api/*", function(req, res) {
-    apiProxy.web(req, res, {target: backend});
-  });
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const exampleProxy = createProxyMiddleware({target: "https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai"});
-app.use('/api2', exampleProxy);
+app.use(
+    '/api-docs',
+    swaggerUi.serve, 
+    swaggerUi.setup(swaggerDocument)
+  );
 
 const httpsServer = https.createServer(options, app)
 const port = 443;

@@ -47,6 +47,7 @@
     "openzeppelin-solidity": "^3.4.0",
     "request": "^2.88.2",
     "simple-thumbnail": "^1.6.5",
+    "swagger-ui-express": "^4.3.0",
     "tabookey-gasless": "^0.4.5",
     "truffle-hdwallet-provider": "^1.0.17",
     "web3": "^1.6.1",
