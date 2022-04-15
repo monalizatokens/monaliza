@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 
 import "./ERC721Tradable.sol";
 import "@opengsn/contracts/src/BaseRelayRecipient.sol";
+import "hardhat/console.sol";
 /**
  * @title Monaliza
  * Monaliza - the contract for non-fungible Monaliza NFTs.
@@ -19,6 +20,7 @@ contract Monaliza is BaseRelayRecipient, ERC721Tradable {
         ERC721Tradable(tokenName, symbol, _proxyRegistryAddress)
     {
         _setTrustedForwarder(forwarder); 
+        console.log("Deploying contract for", tokenName);
     }
 
           
@@ -71,7 +73,7 @@ contract Monaliza is BaseRelayRecipient, ERC721Tradable {
 
 contract MonalizaFactory {
     address[] public contracts;
-    address public lastContractAddress; 
+    mapping (string => address) public lastContractAddressesWithUniqs;
     //uint256 public lastTokenID; 
     mapping (address => uint256) public lastTokenIDs;
     event Mint(Monaliza tokenAddress, uint256 newItemId); 
@@ -89,16 +91,16 @@ contract MonalizaFactory {
         return contracts.length;
     }
 
-    function getLastContractAddress() public view returns(address cAddr) {
-        return lastContractAddress;
+    function getLastContractAddressWithUniq(string memory uniq) public view returns(address lastContract) {
+        return lastContractAddressesWithUniqs[uniq];
     }
 
-    function deployNFTContract(string memory name, string memory symbol, address registryAddress, address forwarder) public returns(address newContract){
+    function deployNFTContract(string memory name, string memory symbol, address registryAddress, address forwarder, string memory uniq) public returns(address newContract){
          Monaliza c = new Monaliza(name, symbol, registryAddress, forwarder);
          //c.setLocalBaseURI(baseURI);
          address cAddr = address(c);
          contracts.push(cAddr);
-         lastContractAddress = cAddr;
+         lastContractAddressesWithUniqs[uniq] = cAddr;
          //c.mint(to, tokenURI);   
          emit DeployContract(name, symbol, cAddr);
          return cAddr;

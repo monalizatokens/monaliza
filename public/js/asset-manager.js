@@ -735,7 +735,11 @@ $( document ).ready(function() {
                       return;
                     }
                     if(getPv.result){
+                      console.log("after getPv.result check --");
+                      console.log(getPv.result.pin);
+                      console.log(pin);
                       if(getPv.result.pin == pin){
+                        console.log("after pin check --");
                         var data = {}
                         data.email = email;
                         data.code = code;
@@ -1013,9 +1017,12 @@ $( document ).ready(function() {
                     airdropAddressesMode = "file";
                     airdropAddressesFileName = localStorage.getItem("airdropAddressesFileName");
                 }else{
+                    console.log("airdropAddressesMode is mnaualEntry")
                     $('#addressTable >tbody >tr').each(function() {
+                        console.log("row");
                         airdropAddressesMode = "manualEntry";
                         var address = $(this).find("td:eq(0)  input[type='email']").val();
+                        console.log(address);
                         if(isEmail(address)){
                           airDropAddresses.push(address); 
                         }else{
@@ -1084,9 +1091,10 @@ $( document ).ready(function() {
                 emptyAddressRows = true
             }
         }else{
+
             var rowCount = $('#addressTable >tbody >tr').length;
             $('#addressTable >tbody >tr').each(function() {
-                var address = $(this).find("td:eq(0)  input[type='text']").val();
+                var address = $(this).find("td:eq(0)  input[type='email']").val();
                 console.log(address);
                 if(address == '') emptyAddressRows = true;
             })
@@ -1512,7 +1520,7 @@ function childrenRow() {
     .append($('<tr>')
         .append($('<td>')
             .append($('<input>')
-                .attr('type', 'text')
+                .attr('type', 'email')
                 .attr('class', 'form-control')
                 //.class('form-control')
             )
