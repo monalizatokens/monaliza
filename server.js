@@ -1071,7 +1071,7 @@ app.post('/claimairdrop', async (req, res) => {
             setTimeout(getTokenID, 8000, 'John Doe');
             console.log('Waiting...');
             async function getTokenID(){
-                var tokenID = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
+                var tokenID = await monalizaFactory.getLastTokenID(req.body.assetContractAddress, req.body.pubAddress);
                 console.log(tokenID);
                 console.log("token ID from fn call is " + tokenID.toString());
                 res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
