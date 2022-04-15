@@ -22,7 +22,7 @@ const base64 = require('js-base64').Base64;
 const ffmpeg = require('ffmpeg-static');
 console.log(ffmpeg);
 const genThumbnail = require('simple-thumbnail');
-const ethSigUtil = require("@metamask/eth-sig-util");
+//const ethSigUtil = require("@metamask/eth-sig-util");
 
 require("dotenv").config()
 const API_URL = process.env.API_URL
@@ -32,6 +32,8 @@ console.log(API_URL)
 //const { createAlchemyWeb3 } = require("@alch/alchemy-web3")
 //const alchemyWeb3 = createAlchemyWeb3(API_URL)
 const { ethers } = require("hardhat");
+
+
 const { MongoClient } = require('mongodb');
 
 //const ethers = require("@nomiclabs/hardhat-ethers");
@@ -44,6 +46,8 @@ const readline = require('readline');
 const {google} = require('googleapis');
 var proxy = require('express-http-proxy');
 var httpProxy = require('http-proxy');
+const swaggerUi = require('swagger-ui-express'),
+swaggerDocument = require('./swagger.json');
 
 /*async function main() {
     // Use connect method to connect to the server
@@ -147,6 +151,7 @@ var monalizaContractAddress = "0x48D3223C50D5aaFA697f016CADa9d785E566E99f";
 
 //const nftFactoryContract = new web3.eth.Contract(contract.abi, monalizaFactoryContractAddress);
 
+//console.log(ethers.ethers);
 
 async function testhh(){
     //const Token = await ethers.getContractFactory("Token");
@@ -184,7 +189,7 @@ async function testhh(){
                 )
               }
             }
-          ).on('receipt', receipt => { console.log('Receipt: ', JSON.stringify(receipt)); });
+          //).on('receipt', receipt => { console.log('Receipt: ', JSON.stringify(receipt)); });
         })
         .catch((err) => {
           console.log(" Promise failed:", err)
@@ -199,9 +204,9 @@ async function testhh(){
         console.log(transaction);
       });
     
-    monalizaFactory.on("DeployContract", (name, symbol, address) => {
+    /*monalizaFactory.on("DeployContract", (name, symbol, address) => {
         console.log(address);
-    });
+    });*/
 
     //const address = await monalizaFactory.deployNFTContract("TST", "TST");
     //console.log(address);
@@ -224,14 +229,11 @@ async function testhh(){
 
 
 const app = express();
-var apiProxy = httpProxy.createProxyServer({ssl: options});
-var backend = 'https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai'
-app.all("/api/*", function(req, res) {
-    apiProxy.web(req, res, {target: backend});
-  });
-const { createProxyMiddleware } = require('http-proxy-middleware');
-const exampleProxy = createProxyMiddleware({target: "https://speedy-nodes-nyc.moralis.io/4cc34909a23798e9e86975d8/polygon/mumbai"});
-app.use('/api2', exampleProxy);
+app.use(
+    '/api-docs',
+    swaggerUi.serve, 
+    swaggerUi.setup(swaggerDocument)
+  );
 
 const httpsServer = https.createServer(options, app)
 const port = 443;
@@ -625,35 +627,52 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
             console.log(value);
             })*/
             //
-            var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress, "0xCB8e0DE47A619d2f26450f22F40399f1B4E015e9");
+            var uniq = 'id' + (new Date()).getTime();
+            console.log(uniq);
+            var sendPromise = await monalizaFactory.deployNFTContract(name, symbol, req.body.creatorAddress, "0xCB8e0DE47A619d2f26450f22F40399f1B4E015e9", uniq);
             //var sendPromise = await monalizaFactory.deployNFTContract("AAA", "AAAA", "0xEdB9535F3689cfedE4a309455fC33C9A7367F87D");
             console.log(sendPromise);
-            /*sendPromise.then(function(transaction){
-                console.log(transaction);
-            });*/
-            var eventCounter = 0;
-            monalizaFactory.on("DeployContract", (name, symbol, address) => {
-            //console.log(address);
-                if(name == req.body.assetName && symbol == req.body.assetSymbol && eventCounter == 0){
-                    console.log("NFT contract address " + address);
-                    eventCounter ++;
-                            //monalizaInstance.deployNFTContract(name, symbol, {from: FROM_ACCOUNT, gas: 4521975, gasPrice: 200000000})
-            //.then(function(value) {
-            //console.log(value);  
-            
-            //console.log("NFT contract address " + value.receipt.rawLogs[0].address);
-            //console.log(value.receipt.rawLogs[0].address);
-                //res.json({"contractAddress": value.receipt.rawLogs[0].address});
-                
-                    genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
-                    .then(() => {
-                        console.log('done!');
-                        const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + req.body.fileName + '.png');
-                        pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
-                            const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
-                                const options = {
+            console.log('Waiting...');
+            setTimeout(getNFTContractAddress, 10000, 'John Doe');
+            async function getNFTContractAddress(){
+                var address = await monalizaFactory.getLastContractAddressWithUniq(uniq);
+                console.log("Contract address found:" + address);
+
+                genThumbnail('./public/uploads/' + req.body.fileName, './public/uploads/' + req.body.fileName + '.png', '250x?')
+                .then(() => {
+                    console.log('done!');
+                    const readableStreamForThumbnailFile = fs.createReadStream('./public/uploads/' + req.body.fileName + '.png');
+                    pinata.pinFileToIPFS(readableStreamForThumbnailFile, options).then((thumbNailResult) => {
+                        const readableStreamForFile = fs.createReadStream('./public/uploads/' + req.body.fileName);
+                            const options = {
+                                pinataMetadata: {
+                                    name: "somename",
+                                    keyvalues: {
+                                        customKey: 'customValue',
+                                        customKey2: 'customValue2'
+                                    }
+                                },
+                                pinataOptions: {
+                                    cidVersion: 0
+                                }
+                            };
+
+                            pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
+                                console.log("In pinFileToIPFS");
+                                //handle results here
+                                //console.log(result);
+                            //prepare metadata object
+                            var metadata= {
+                                "name": req.body.assetName,
+                                "description": req.body.description,
+                                "image": "ipfs://" + thumbNailResult.IpfsHash,
+                                "youtube_url": "https://ipfs.io/ipfs/" + result.IpfsHash
+                            }
+                            //Create metadata URI
+                            //TODO
+                                const metadataOptions = {
                                     pinataMetadata: {
-                                        name: "somename",
+                                        name: "metadata",
                                         keyvalues: {
                                             customKey: 'customValue',
                                             customKey2: 'customValue2'
@@ -663,78 +682,62 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                                         cidVersion: 0
                                     }
                                 };
+                                pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
+                                    console.log("In pinJSONToIPFS");
+                                    saveAssetInMongo(address, req, metadataResult, res)
+                                    .then(console.log)
+                                    .catch(console.error)
+                                    .finally(() => client.close());
+                                    //return 'done.';
 
-                                pinata.pinFileToIPFS(readableStreamForFile, options).then((result) => {
-                                    console.log("In pinFileToIPFS");
-                                    //handle results here
-                                    //console.log(result);
-                                //prepare metadata object
-                                var metadata= {
-                                    "name": req.body.assetName,
-                                    "description": req.body.description,
-                                    "image": "ipfs://" + thumbNailResult.IpfsHash,
-                                    "youtube_url": "https://ipfs.io/ipfs/" + result.IpfsHash
-                                }
-                                //Create metadata URI
-                                //TODO
-                                    const metadataOptions = {
-                                        pinataMetadata: {
-                                            name: "metadata",
-                                            keyvalues: {
-                                                customKey: 'customValue',
-                                                customKey2: 'customValue2'
-                                            }
-                                        },
-                                        pinataOptions: {
-                                            cidVersion: 0
-                                        }
-                                    };
-                                    pinata.pinJSONToIPFS(metadata, metadataOptions).then((metadataResult) => {
-                                        console.log("In pinJSONToIPFS");
-                                        saveAssetInMongo(address, req, metadataResult, res)
-                                        .then(console.log)
-                                        .catch(console.error)
-                                        .finally(() => client.close());
-                                        //return 'done.';
-
-                                        //var allAssets =  db.get('assets').assetDetails;
-                                        /*allAssets.push({
-                                            "assetContractID": address,
-                                            "assetName": req.body.assetName,
-                                            "assetSymbol": req.body.assetSymbol,
-                                            "assetType": "ERC721",
-                                            "creatorAddress": req.body.creatorAddress,
-                                            "imageSrc": req.body.fileName,
-                                            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
-                                            "contentSrc": req.body.fileName,
-                                            "docURL": req.body.docURL || '',
-                                            "description": req.body.description  || ''
-                                        })  
-                                        db.set('assets', {"assetDetails": allAssets});  
-                                        db.sync();*/
-                                    }).catch((err) => {
-                                        //handle error here
-                                        console.log(err);
-                                        //client.close();
-                                    });
-                                
+                                    //var allAssets =  db.get('assets').assetDetails;
+                                    /*allAssets.push({
+                                        "assetContractID": address,
+                                        "assetName": req.body.assetName,
+                                        "assetSymbol": req.body.assetSymbol,
+                                        "assetType": "ERC721",
+                                        "creatorAddress": req.body.creatorAddress,
+                                        "imageSrc": req.body.fileName,
+                                        "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
+                                        "contentSrc": req.body.fileName,
+                                        "docURL": req.body.docURL || '',
+                                        "description": req.body.description  || ''
+                                    })  
+                                    db.set('assets', {"assetDetails": allAssets});  
+                                    db.sync();*/
                                 }).catch((err) => {
                                     //handle error here
                                     console.log(err);
+                                    //client.close();
                                 });
                             
+                            }).catch((err) => {
+                                //handle error here
+                                console.log(err);
+                            });
+                        
 
 
-                        }).catch((err) => {
-                            //handle error here
-                            console.log(err);
-                        });
-                    })
-                    .catch(err => console.error(err))
+                    }).catch((err) => {
+                        //handle error here
+                        console.log(err);
+                    });
+                })
+                .catch(err => console.error(err))
+
+            }
+
+            /*sendPromise.then(function(transaction){
+                console.log(transaction);
+            });*/
+            /*var eventCounter = 0;
+            monalizaFactory.on("DeployContract", (name, symbol, address) => {
+            //console.log(address);
+                if(name == req.body.assetName && symbol == req.body.assetSymbol && eventCounter == 0){
+                    console.log("NFT contract address " + address);
+                    eventCounter ++;
                     }
-                
-
-                });  
+                }); */ 
             }
 
         
@@ -799,7 +802,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
         return 'done.';
     }
 
-    async function processNFTContractDeployment(req, res){
+    /*async function processNFTContractDeployment(req, res){
             //res.send('NFT contract deployment started!' + " with " + req.query.name + " " + req.query.symbol);
             var name = req.body.assetName;
             var symbol = req.body.assetSymbol;
@@ -910,7 +913,7 @@ app.post('/fileupload', upload.single('file-to-upload'), (req, res, next) => {
                 })
                 .catch(err => console.error(err))
                 });  
-    }
+    }*/
 
 app.post('/deploynftcontract2', (req, res, next) => {
     console.log("Starting to execute deploynft");
@@ -1061,79 +1064,22 @@ app.post('/claimairdrop', async (req, res) => {
             console.log(sendPromise);
             //Check if transaction hash is sucessful
             //https://ethereum.stackexchange.com/questions/80617/how-can-i-know-a-hash-mined-and-confirmed-by-ethers-js/80622
-            var delayInMilliseconds = 5000; //1 second
 
-            const sayHello = async (name) => {
-                console.log(`Hello ${name}. Welcome to KindaCode.com`);
-                var tokenIDObtained = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
-                console.log(tokenIDObtained);
-                console.log("token ID from fn call is " + tokenIDObtained.toString());
-                /*var owner = monaliza.ownerOf(tokenIDObtained.toString());
-                if(owner == req.body.pubAddress){
-                    res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenIDObtained.toString()});
-                    saveAirdropClaimedInMongo(req, tokenIDObtained.toString())
-                    .then(console.log)
-                    .catch(console.error)
-                    .finally(() => client.close());
-                    return;
-                }*/
-                //var tx =  await monaliza.setApprovalForAll("0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", true, gasFeeOptions);
-                //console.log(tx);
-                //var status = await monaliza.isApprovedForAll("0xEdB9535F3689cfedE4a309455fC33C9A7367F87D","0x72c9B90c57A3e1AB19A8A2C81828d52fff5a0E49", gasFeeOptions)
-                //console.log(status);
-                /*var sendPromise = await monaliza.approve("0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
-                console.log(sendPromise);
-                var sendPromise2 = await monaliza.transferFrom("0x5Bd46de6E8d4e8Ba0fdd76ACC8d543bA07b58dE5", "0x15a2AD79Cfe458A5BB2b061CCfc99426122Ac46a", 1, gasFeeOptions)
-                console.log(sendPromise2);*/
-            }
-            
-            //console.log('Waiting...');
-            //setTimeout(sayHello, 8000, 'John Doe');
 
             //Invoke contract function getLastTokenID(Monaliza contractAddress) and get tokenID
 
-
-            var eventCounter = 0;
-            monalizaFactory.on("Mint", (address, tokenID) => {
-            //console.log(address);
-                if(address == req.body.assetContractAddress && eventCounter == 0){
-                    console.log("NFT token ID " + tokenID);
-                    eventCounter ++;
-                    //console.log("NFT minted transaction id is " + tokenID);
-                    //add to airdropped list and prevent duplicate claim
-                    //console.log(result);
-                    //console.log("tokenID is " + tokenID);
-                    res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
-                    /*var allAirdropsClaimed;
-                    var allAirdropsClaimedDetails;
-                    try{
-                        allAirdropsClaimedDetails = db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
-                        //console.log(airdropDetails);
-                    }catch(e){
-                
-                    }*/
-                    saveAirdropClaimedInMongo(req, tokenID.toString())
-                    .then(console.log)
-                    .catch(console.error)
-                    .finally(() => client.close());
-        
-                        /*if(allAirdropsClaimedDetails != undefined){
-                            allAirdropsClaimed =  db.get('allAirdropsClaimed').allAirdropsClaimedDetails;
-                        }else{
-                            allAirdropsClaimed = new Array();
-                        }
-                        allAirdropsClaimed.push({
-                            "assetContractAddress": req.body.assetContractAddress,
-                            "airdropAddress": req.body.userAddress,
-                            "tokenID": tokenID.toString()
-                        })  
-                        db.set('allAirdropsClaimed', {"allAirdropsClaimedDetails": allAirdropsClaimed});  
-                        //console.log(db.get('allAirdropsClaimed').allAirdropsClaimedDetails);
-                        db.sync();*/
-            
-                }
-            
-        })
+            setTimeout(getTokenID, 8000, 'John Doe');
+            console.log('Waiting...');
+            async function getTokenID(){
+                var tokenID = await monalizaFactory.getLastTokenID(req.body.assetContractAddress);
+                console.log(tokenID);
+                console.log("token ID from fn call is " + tokenID.toString());
+                res.send({assetContractID: req.body.assetContractAddress, tokenID: tokenID.toString()});
+                saveAirdropClaimedInMongo(req, tokenID.toString())
+                .then(console.log)
+                .catch(console.error)
+                .finally(() => client.close());
+            }
     }    
 
 
@@ -1818,7 +1764,7 @@ function watchEmail(auth){
                 console.log(transaction);
             });*/
             var eventCounter = 0;
-            monalizaFactory.on("DeployContract", (name, symbol, address) => {
+            /*monalizaFactory.on("DeployContract", (name, symbol, address) => {
             //console.log(address);
                 if(name == contractDetails.assetName && symbol == contractDetails.assetSymbol && eventCounter == 0){
                     console.log("NFT contract address " + address);
@@ -1884,20 +1830,7 @@ function watchEmail(auth){
                                         //return 'done.';
     
                                         //var allAssets =  db.get('assets').assetDetails;
-                                        /*allAssets.push({
-                                            "assetContractID": address,
-                                            "assetName": req.body.assetName,
-                                            "assetSymbol": req.body.assetSymbol,
-                                            "assetType": "ERC721",
-                                            "creatorAddress": req.body.creatorAddress,
-                                            "imageSrc": req.body.fileName,
-                                            "ipfsURL": "https://ipfs.io/ipfs/" + metadataResult.IpfsHash,
-                                            "contentSrc": req.body.fileName,
-                                            "docURL": req.body.docURL || '',
-                                            "description": req.body.description  || ''
-                                        })  
-                                        db.set('assets', {"assetDetails": allAssets});  
-                                        db.sync();*/
+ 
                                         sendMessage(contractDetails.to, contractDetails.auth, address);  
                                     }).catch((err) => {
                                         //handle error here
@@ -1921,7 +1854,7 @@ function watchEmail(auth){
                     }
                 
     
-                });  
+                });  */
             } catch (error) {
                 console.log(error)
                 return next(error)

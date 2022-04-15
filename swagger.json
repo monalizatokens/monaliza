@@ -1,0 +1,128 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "version": "0.0.8",
+      "title": "Monaliza",
+      "description": "Monaliza API"
+    },
+    
+    "basePath": "/",
+    "tags": [
+      {
+        "name": "CreateAirdrop",
+        "description": "Create Airdrop"
+      }
+    ],
+    "schemes": ["https"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "paths": {
+        "/createairdrop": {
+            "post": {
+              "description": "Creates Airdrop",
+              "operationId": "createAirDrop",
+              "produces": [
+                "application/json"
+              ],
+              "parameters": [
+                {
+                  "name": "pubAddress",
+                  "in": "body",
+                  "description": "public address",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                    "name": "sign",
+                    "in": "body",
+                    "description": "wallet signature",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "airdropAddressesMode",
+                    "in": "body",
+                    "description": "airdrop addresses mode ('file' or null)",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "fileName",
+                    "in": "body",
+                    "description": "file name (if 'file' used for airdropAddressesMode)",
+                    "required": false,
+                    "type": "string"
+                },   
+                {
+                    "name": "airdropAddresses",
+                    "in": "body",
+                    "description": "airdrop email addresses (if 'file' not used for airdropAddressesMode)",
+                    "required": false,
+                    "type": "array",
+                        "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "creatorAddress",
+                    "in": "body",
+                    "description": "creator public address",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "assetContractAddress",
+                    "in": "body",
+                    "description": "asset NFT contract address",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "creationDate",
+                    "in": "body",
+                    "description": "asset creation date time",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "assetName",
+                    "in": "body",
+                    "description": "asset name",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "in": "body",
+                    "description": "asset description",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "ipfsURL",
+                    "in": "body",
+                    "description": "asset ipfsURL",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "docURL",
+                    "in": "body",
+                    "description": "asset URL",
+                    "required": true,
+                    "type": "string"
+                }                         
+              ],
+              "responses": {
+                "200": {
+                  "description": "response",
+                  "schema": {
+                    "type":"object",
+                    "example":{"message": "value"}
+                  }
+                }
+              }
+            }
+        }
+    }
+  }
