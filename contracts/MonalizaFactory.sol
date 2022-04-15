@@ -75,7 +75,14 @@ contract MonalizaFactory {
     address[] public contracts;
     mapping (string => address) public lastContractAddressesWithUniqs;
     //uint256 public lastTokenID; 
-    mapping (address => uint256) public lastTokenIDs;
+    struct MintedTokenStruct {
+        Monaliza contractAddress;
+        address to;
+        uint256 tokenID;
+    }
+    MintedTokenStruct[] mintedTokenStructs;
+
+    //mapping (uint256 => mintedTokenStruct) public lastTokenIDsStructs;
     event Mint(Monaliza tokenAddress, uint256 newItemId); 
     event DeployContract(string name, string symbol, address newContract); 
     //event AddAirDrop(address tokenAddress); 
@@ -121,7 +128,7 @@ contract MonalizaFactory {
         //if(tokenAddress.isAddressAllowed(to)){
                 newItemId = tokenAddress.mintTo(to);
                 tokenAddress._setTokenURI(newItemId, tokenURI);
-                lastTokenIDs[address(tokenAddress)] = newItemId;
+                mintedTokenStructs.push(MintedTokenStruct(tokenAddress, to, newItemId));
 
                 emit Mint(tokenAddress, newItemId);
                 return newItemId;
@@ -137,9 +144,13 @@ contract MonalizaFactory {
         return tokenID;
     }     
 
-    function getLastTokenID(Monaliza contractAddress) public view returns(uint256 newItemId) {
-        newItemId = lastTokenIDs[address(contractAddress)];
-        return newItemId;
+    function getLastTokenID(Monaliza contractAddress, address to) public view returns(uint256 newItemId) {
+        uint256 count =  mintedTokenStructs.length;
+        for(uint256 i=0; i < count; i++){
+            if ((mintedTokenStructs[i].contractAddress == contractAddress) && (mintedTokenStructs[i].to == to)){
+                return mintedTokenStructs[i].tokenID;
+            }
+        }
     }    
 
     /*function isAddressAllowedForMinting(Monaliza contractAddress, address userAddress) public view returns(bool) {
