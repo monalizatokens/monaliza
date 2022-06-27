@@ -1,4 +1,4 @@
-# monaliza
+# Monaliza: The NFT Infrastructure Platform
 
 To run:  
 npm install -g pm2
