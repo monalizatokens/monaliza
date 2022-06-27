@@ -1,4 +1,4 @@
-# Monaliza: The NFT Infrastructure Platform
+# Monaliza: Web3 NFT Infrastructure Platform
 
 To run:  
 npm install -g pm2
